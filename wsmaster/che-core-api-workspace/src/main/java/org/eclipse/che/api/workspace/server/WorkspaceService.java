@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.core.rest.permission.PermissionManager;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.server.MachineManager;
@@ -91,7 +90,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LIN_REL_GET_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
-import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
@@ -108,7 +106,6 @@ public class WorkspaceService extends Service {
 
     private final WorkspaceManager   workspaceManager;
     private final WorkspaceValidator validator;
-    private final PermissionManager  permissionManager;
     private final MachineManager     machineManager;
     //TODO: we need keep IDE context in some property to have possibility configure it because context is different in Che and Hosted packaging
     //TODO: not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
@@ -121,12 +118,10 @@ public class WorkspaceService extends Service {
     public WorkspaceService(WorkspaceManager workspaceManager,
                             MachineManager machineManager,
                             WorkspaceValidator validator,
-                            @Named("service.workspace.permission_manager") PermissionManager permissionManager,
                             @Named("che.ide.context") String ideContext) {
         this.workspaceManager = workspaceManager;
         this.machineManager = machineManager;
         this.validator = validator;
-        this.permissionManager = permissionManager;
         this.ideContext = ideContext;
     }
 
@@ -202,7 +197,6 @@ public class WorkspaceService extends Service {
                                                                       BadRequestException {
         validateKey(key);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-        ensureUserIsWorkspaceOwner(workspace);
         return injectLinks(asDto(workspace));
     }
 
@@ -258,7 +252,6 @@ public class WorkspaceService extends Service {
                                                            NotFoundException,
                                                            ConflictException {
         requiredNotNull(update, "Workspace configuration");
-        ensureUserIsWorkspaceOwner(id);
         validator.validateWorkspace(update);
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, update)));
     }
@@ -278,7 +271,6 @@ public class WorkspaceService extends Service {
                                                                                         NotFoundException,
                                                                                         ConflictException,
                                                                                         ForbiddenException {
-        ensureUserIsWorkspaceOwner(id);
         workspaceManager.removeWorkspace(id);
     }
 
@@ -313,12 +305,9 @@ public class WorkspaceService extends Service {
                                                            NotFoundException,
                                                            ForbiddenException,
                                                            ConflictException {
-        ensureUserIsWorkspaceOwner(workspaceId);
-
         final Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
         params.put("accountId", accountId);
         params.put("workspaceId", workspaceId);
-        permissionManager.checkPermission(START_WORKSPACE, getCurrentUserId(), params);
 
         final WorkspaceImpl workspace;
         if (autoRestore && snapshotExists(workspaceId)) {
@@ -358,7 +347,6 @@ public class WorkspaceService extends Service {
                                                                  ServerException,
                                                                  ConflictException {
         requiredNotNull(cfg, "Workspace configuration");
-        permissionManager.checkPermission(START_WORKSPACE, getCurrentUserId(), "accountId", accountId);
         validator.validateConfig(cfg);
         return injectLinks(asDto(workspaceManager.startWorkspace(cfg,
                                                                  getCurrentUserId(),
@@ -393,12 +381,9 @@ public class WorkspaceService extends Service {
                                                                   NotFoundException,
                                                                   ServerException,
                                                                   ConflictException {
-        ensureUserIsWorkspaceOwner(workspaceId);
-
         final Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
         params.put("accountId", accountId);
         params.put("workspaceId", workspaceId);
-        permissionManager.checkPermission(START_WORKSPACE, getCurrentUserId(), params);
 
         return injectLinks(asDto(workspaceManager.recoverWorkspace(workspaceId, envName, accountId)));
     }
@@ -423,7 +408,6 @@ public class WorkspaceService extends Service {
                                                   NotFoundException,
                                                   ServerException,
                                                   ConflictException {
-        ensureUserIsWorkspaceOwner(id);
         workspaceManager.stopWorkspace(id, autoSnapshot);
     }
 
@@ -443,8 +427,6 @@ public class WorkspaceService extends Service {
                                                                                                          NotFoundException,
                                                                                                          ServerException,
                                                                                                          ConflictException {
-        ensureUserIsWorkspaceOwner(workspaceId);
-
         workspaceManager.createSnapshot(workspaceId);
     }
 
@@ -465,8 +447,6 @@ public class WorkspaceService extends Service {
                                                                                                                           BadRequestException,
                                                                                                                           NotFoundException,
                                                                                                                           ForbiddenException {
-        ensureUserIsWorkspaceOwner(workspaceId);
-
         return workspaceManager.getSnapshot(workspaceId)
                                .stream()
                                .map(DtoConverter::asDto)
@@ -498,7 +478,6 @@ public class WorkspaceService extends Service {
                                                                  ForbiddenException {
         requiredNotNull(newCommand, "Command");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         workspace.getConfig().getCommands().add(new CommandImpl(newCommand));
         validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)));
@@ -530,7 +509,6 @@ public class WorkspaceService extends Service {
                                                                 ForbiddenException {
         requiredNotNull(update, "Command update");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         final List<CommandImpl> commands = workspace.getConfig().getCommands();
         if (!commands.removeIf(cmd -> cmd.getName().equals(cmdName))) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain command '%s'", id, cmdName));
@@ -560,7 +538,6 @@ public class WorkspaceService extends Service {
                                                          ConflictException,
                                                          ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         if (workspace.getConfig().getCommands().removeIf(command -> command.getName().equals(commandName))) {
             workspaceManager.updateWorkspace(id, workspace);
         }
@@ -590,7 +567,6 @@ public class WorkspaceService extends Service {
                                                                              ForbiddenException {
         requiredNotNull(newEnvironment, "New environment");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(newEnvironment));
         validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
@@ -622,7 +598,6 @@ public class WorkspaceService extends Service {
                                                                         ForbiddenException {
         requiredNotNull(update, "Environment description");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         final List<EnvironmentImpl> environments = workspace.getConfig().getEnvironments();
         if (!environments.stream().anyMatch(env -> env.getName().equals(envName))) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
@@ -652,7 +627,6 @@ public class WorkspaceService extends Service {
                                                          ConflictException,
                                                          ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         if (workspace.getConfig().getEnvironments().removeIf(e -> e.getName().equals(envName))) {
             workspaceManager.updateWorkspace(id, workspace);
         }
@@ -682,7 +656,6 @@ public class WorkspaceService extends Service {
                                                                        ForbiddenException {
         requiredNotNull(newProject, "New project config");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         workspace.getConfig().getProjects().add(new ProjectConfigImpl(newProject));
         validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
@@ -714,7 +687,6 @@ public class WorkspaceService extends Service {
                                                                       ForbiddenException {
         requiredNotNull(update, "Project config");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
         final String normalizedPath = path.startsWith("/") ? path : '/' + path;
         if (!projects.removeIf(project -> project.getPath().equals(normalizedPath))) {
@@ -747,7 +719,6 @@ public class WorkspaceService extends Service {
                                                   ConflictException,
                                                   ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        ensureUserIsWorkspaceOwner(workspace);
         final String normalizedPath = path.startsWith("/") ? path : '/' + path;
         if (workspace.getConfig().getProjects().removeIf(project -> project.getPath().equals(normalizedPath))) {
             workspaceManager.updateWorkspace(id, workspace);
@@ -787,8 +758,6 @@ public class WorkspaceService extends Service {
             throw new NotFoundException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
         }
 
-        ensureUserIsWorkspaceOwner(workspace);
-
         final MachineImpl machine = machineManager.createMachineAsync(machineConfig,
                                                                       workspaceId,
                                                                       workspace.getRuntime().getActiveEnv());
@@ -797,34 +766,6 @@ public class WorkspaceService extends Service {
                        .entity(MachineService.injectLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
                                                           getServiceContext()))
                        .build();
-    }
-
-    /**
-     * Checks that principal from current {@link EnvironmentContext#getUser() context} is in 'workspace/owner' role
-     * if he is not throws {@link ForbiddenException}.
-     *
-     * <p>{@link SecurityContext#isUserInRole(String)} is not the case,
-     * as it works only for 'user', 'tmp-user', 'system/admin', 'system/manager.
-     */
-    private void ensureUserIsWorkspaceOwner(String workspaceId) throws ServerException,
-                                                                       ForbiddenException,
-                                                                       NotFoundException {
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
-        ensureUserIsWorkspaceOwner(workspace);
-    }
-
-    /**
-     * Checks that principal from current {@link EnvironmentContext#getUser() context} is in 'workspace/owner' role
-     * if he is not throws {@link ForbiddenException}.
-     *
-     * <p>{@link SecurityContext#isUserInRole(String)} is not the case,
-     * as it works only for 'user', 'tmp-user', 'system/admin', 'system/manager.
-     */
-    private void ensureUserIsWorkspaceOwner(WorkspaceImpl usersWorkspace) throws ServerException, ForbiddenException {
-        final String userId = getCurrentUserId();
-        if (!usersWorkspace.getNamespace().equals(userId)) {
-            throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
-        }
     }
 
     private WorkspaceDto injectLinks(WorkspaceDto workspace) {
