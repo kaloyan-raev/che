@@ -8,16 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server;
+package org.eclipse.che.api.machine.server.terminal;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.spi.Instance;
 
 /**
- * Starts ws agent in the machine and wait until ws agent sends notification about its start
+ * Machine implementation specific launcher of websocket terminal.
  *
- * @author Alexander Garagatyi
+ * author Alexander Garagatyi
  */
-public interface WsAgentLauncher {
-    void startWsAgent(String workspaceId) throws NotFoundException, MachineException, InterruptedException;
+public interface MachineImplSpecificTerminalLauncher {
+    /**
+     * Type of machine implementation this terminal fits.
+     */
+    String getMachineType();
+
+    /**
+     * Starts websocket terminal inside of machine.
+     */
+    void launchTerminal(Instance machine) throws MachineException;
 }
