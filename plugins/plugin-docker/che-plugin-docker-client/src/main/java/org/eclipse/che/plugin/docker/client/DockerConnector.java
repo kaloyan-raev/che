@@ -1476,17 +1476,13 @@ public class DockerConnector {
      */
     protected String doCommit(final CommitParams params, final URI dockerDaemonUri) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
-        headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
-        final String entity = "{}";
-        headers.add(Pair.of("Content-Length", entity.getBytes().length));
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/commit")
                                                             .query("container", params.container())
                                                             .query("repo", params.repository())
-                                                            .headers(headers)
-                                                            .entity(entity)) {
+                                                            .headers(headers)) {
             addQueryParamIfSet(connection, "tag", params.tag());
             addQueryParamIfSet(connection, "comment", URLEncoder.encode(params.comment(), "UTF-8"));
             addQueryParamIfSet(connection, "author", URLEncoder.encode(params.author(), "UTF-8"));
