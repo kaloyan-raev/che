@@ -31,7 +31,7 @@ public class GetResourceParams {
      *         info about this parameter @see {@link #withContainer(String)}
      * @param sourcePath
      *         info about this parameter @see {@link #withSourcePath(String)}
-     * @return get resource arguments holder with required parameters
+     * @return arguments holder with required parameters
      */
     public static GetResourceParams from(@NotNull String container, @NotNull String sourcePath) {
         return new GetResourceParams().withContainer(container)
@@ -44,7 +44,7 @@ public class GetResourceParams {
      * @param container
      *         container id or name
      */
-    public GetResourceParams withContainer(String container) {
+    public GetResourceParams withContainer(@NotNull String container) {
         requireNonNull(container);
         this.container = container;
         return this;
@@ -56,7 +56,7 @@ public class GetResourceParams {
      *         The resource specified by path must exist. It should end in '/' or '/.'.<br/>
      *         A symlink is always resolved to its target.
      */
-    public GetResourceParams withSourcePath(String sourcePath) {
+    public GetResourceParams withSourcePath(@NotNull String sourcePath) {
         requireNonNull(sourcePath);
         this.sourcePath = sourcePath;
         return this;

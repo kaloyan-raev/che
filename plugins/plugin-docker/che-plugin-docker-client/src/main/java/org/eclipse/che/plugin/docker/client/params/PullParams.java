@@ -12,6 +12,10 @@ package org.eclipse.che.plugin.docker.client.params;
 
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#pull(PullParams, ProgressMonitor)}.
  *
@@ -24,10 +28,24 @@ public class PullParams {
     private String registry;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param image
+     *         info about this parameter @see {@link #withImage(String)}
+     * @return arguments holder with required parameters
+     */
+    public static PullParams from(@NotNull String image) {
+        return new PullParams().withImage(image);
+    }
+
+    private PullParams() {}
+
+    /**
      * @param image
      *         name of the image to pull
      */
-    public PullParams withImage(String image) {
+    public PullParams withImage(@NotNull String image) {
+        requireNonNull(image);
         this.image = image;
         return this;
     }
@@ -51,15 +69,15 @@ public class PullParams {
         return this;
     }
 
-    public String getImage() {
+    public String image() {
         return image;
     }
 
-    public String getTag() {
+    public String tag() {
         return tag;
     }
 
-    public String getRegistry() {
+    public String registry() {
         return registry;
     }
 

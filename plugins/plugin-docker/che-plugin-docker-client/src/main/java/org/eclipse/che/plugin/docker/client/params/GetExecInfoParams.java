@@ -28,7 +28,7 @@ public class GetExecInfoParams {
      *
      * @param execId
      *         info about this parameter @see {@link #withExecId(String)}
-     * @return get exec info arguments holder with required parameters
+     * @return arguments holder with required parameters
      */
     public static GetExecInfoParams from(@NotNull String execId) {
         return new GetExecInfoParams().withExecId(execId);

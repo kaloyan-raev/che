@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#removeContainer(RemoveContainerParams)}.
  *
@@ -22,10 +26,24 @@ public class RemoveContainerParams {
     private Boolean removeVolumes;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         info about this parameter @see {@link #withContainer(String)}
+     * @return arguments holder with required parameters
+     */
+    public static RemoveContainerParams from(@NotNull String container) {
+        return new RemoveContainerParams().withContainer(container);
+    }
+
+    private RemoveContainerParams() {}
+
+    /**
      * @param container
      *         container identifier, either id or name
      */
-    public RemoveContainerParams withContainer(String container) {
+    public RemoveContainerParams withContainer(@NotNull String container) {
+        requireNonNull(container);
         this.container = container;
         return this;
     }
@@ -48,15 +66,15 @@ public class RemoveContainerParams {
         return this;
     }
 
-    public String getContainer() {
+    public String container() {
         return container;
     }
 
-    public Boolean isForce() {
+    public Boolean force() {
         return force;
     }
 
-    public Boolean isRemoveVolumes() {
+    public Boolean removeVolumes() {
         return removeVolumes;
     }
 

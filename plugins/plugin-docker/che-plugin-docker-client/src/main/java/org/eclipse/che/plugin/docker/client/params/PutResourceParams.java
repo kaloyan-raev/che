@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
 import java.io.InputStream;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#putResource(PutResourceParams)}.
@@ -25,10 +28,27 @@ public class PutResourceParams {
     private Boolean     noOverwriteDirNonDir;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         info about this parameter @see {@link #withContainer(String)}
+     * @param targetPath
+     *         info about this parameter @see {@link #withTargetPath(String)}
+     * @return arguments holder with required parameters
+     */
+    public static PutResourceParams from(@NotNull String container, @NotNull String targetPath) {
+        return new PutResourceParams().withContainer(container)
+                                      .withTargetPath(targetPath);
+    }
+
+    private PutResourceParams() {}
+
+    /**
      * @param container
      *         container id or name
      */
-    public PutResourceParams withContainer(String container) {
+    public PutResourceParams withContainer(@NotNull String container) {
+        requireNonNull(container);
         this.container = container;
         return this;
     }
@@ -38,7 +58,8 @@ public class PutResourceParams {
      *         path to a directory in the container to extract the archive’s contents into. Required.
      *         If not an absolute path, it is relative to the container’s root directory. The path resource must exist.
      */
-    public PutResourceParams withTargetPath(String targetPath) {
+    public PutResourceParams withTargetPath(@NotNull String targetPath) {
+        requireNonNull(targetPath);
         this.targetPath = targetPath;
         return this;
     }
@@ -63,19 +84,19 @@ public class PutResourceParams {
         return this;
     }
 
-    public String getContainer() {
+    public String container() {
         return container;
     }
 
-    public String getTargetPath() {
+    public String targetPath() {
         return targetPath;
     }
 
-    public InputStream getSourceStream() {
+    public InputStream sourceStream() {
         return sourceStream;
     }
 
-    public Boolean isNoOverwriteDirNonDir() {
+    public Boolean noOverwriteDirNonDir() {
         return noOverwriteDirNonDir;
     }
 

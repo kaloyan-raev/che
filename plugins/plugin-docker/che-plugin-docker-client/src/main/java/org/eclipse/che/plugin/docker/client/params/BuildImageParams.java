@@ -40,7 +40,7 @@ public class BuildImageParams {
      *
      * @param files
      *         info about this parameter @see {@link #withFiles(File...)}
-     * @return build image arguments holder with required parameters
+     * @return arguments holder with required parameters
      */
     public static BuildImageParams from(@NotNull File... files) {
         return new BuildImageParams().withFiles(files);

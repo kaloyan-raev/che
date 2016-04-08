@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#tag(TagParams)}.
  *
@@ -23,10 +27,27 @@ public class TagParams {
     private Boolean force;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param image
+     *         info about this parameter @see {@link #withImage(String)}
+     * @param repository
+     *         info about this parameter @see {@link #withRepository(String)}
+     * @return arguments holder with required parameters
+     */
+    public static TagParams from(@NotNull String image, @NotNull String repository) {
+        return new TagParams().withImage(image)
+                              .withRepository(repository);
+    }
+
+    private TagParams() {}
+
+    /**
      * @param image
      *         image name
      */
-    public TagParams withImage(String image) {
+    public TagParams withImage(@NotNull String image) {
+        requireNonNull(image);
         this.image = image;
         return this;
     }
@@ -35,7 +56,8 @@ public class TagParams {
      * @param repository
      *         the repository to tag in
      */
-    public TagParams withRepository(String repository) {
+    public TagParams withRepository(@NotNull String repository) {
+        requireNonNull(repository);
         this.repository = repository;
         return this;
     }
@@ -58,19 +80,19 @@ public class TagParams {
         return this;
     }
 
-    public String getImage() {
+    public String image() {
         return image;
     }
 
-    public String getRepository() {
+    public String repository() {
         return repository;
     }
 
-    public String getTag() {
+    public String tag() {
         return tag;
     }
 
-    public Boolean isForce() {
+    public Boolean force() {
         return force;
     }
 

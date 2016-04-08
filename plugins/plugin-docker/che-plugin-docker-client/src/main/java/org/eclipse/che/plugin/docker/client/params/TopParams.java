@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#top(TopParams)}.
  *
@@ -21,10 +25,24 @@ public class TopParams {
     private String[] psArgs;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         info about this parameter @see {@link #withContainer(String)}
+     * @return arguments holder with required parameters
+     */
+    public static TopParams from(@NotNull String container) {
+        return new TopParams().withContainer(container);
+    }
+
+    private TopParams() {}
+
+    /**
      * @param container
      *         container id or name
      */
-    public TopParams withContainer(String container) {
+    public TopParams withContainer(@NotNull String container) {
+        requireNonNull(container);
         this.container = container;
         return this;
     }
@@ -40,11 +58,11 @@ public class TopParams {
         return this;
     }
 
-    public String getContainer() {
+    public String container() {
         return container;
     }
 
-    public String[] getPsArgs() {
+    public String[] psArgs() {
         return psArgs;
     }
 

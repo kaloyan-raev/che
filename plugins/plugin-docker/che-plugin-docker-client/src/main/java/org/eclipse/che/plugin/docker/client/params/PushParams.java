@@ -32,7 +32,7 @@ public class PushParams {
      *
      * @param repository
      *         info about this parameter @see {@link #withRepository(String)}
-     * @return push arguments holder with required parameters
+     * @return arguments holder with required parameters
      */
     public static PushParams from(@NotNull String repository) {
         return new PushParams().withRepository(repository);

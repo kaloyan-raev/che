@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#removeImage(RemoveImageParams)}.
  *
@@ -21,10 +25,24 @@ public class RemoveImageParams {
     private Boolean force;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param image
+     *         info about this parameter @see {@link #withImage(String)}
+     * @return arguments holder with required parameters
+     */
+    public static RemoveImageParams from(@NotNull String image) {
+        return new RemoveImageParams().withImage(image);
+    }
+
+    private RemoveImageParams() {}
+
+    /**
      * @param image
      *         image identifier, either id or name
      */
-    public RemoveImageParams withImage(String image) {
+    public RemoveImageParams withImage(@NotNull String image) {
+        requireNonNull(image);
         this.image = image;
         return this;
     }
@@ -38,11 +56,11 @@ public class RemoveImageParams {
         return this;
     }
 
-    public String getImage() {
+    public String image() {
         return image;
     }
 
-    public Boolean isForce() {
+    public Boolean force() {
         return force;
     }
 

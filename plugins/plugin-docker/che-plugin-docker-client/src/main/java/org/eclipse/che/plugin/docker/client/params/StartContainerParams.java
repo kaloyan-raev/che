@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#startContainer(StartContainerParams)}.
  *
@@ -20,15 +24,29 @@ public class StartContainerParams {
     private String container;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         info about this parameter @see {@link #withContainer(String)}
+     * @return arguments holder with required parameters
+     */
+    public static StartContainerParams from(@NotNull String container) {
+        return new StartContainerParams().withContainer(container);
+    }
+
+    private StartContainerParams() {}
+
+    /**
      * @param container
      *         id or name of container to start
      */
-    public StartContainerParams withContainer(String container) {
+    public StartContainerParams withContainer(@NotNull String container) {
+        requireNonNull(container);
         this.container = container;
         return this;
     }
 
-    public String getContainer() {
+    public String container() {
         return container;
     }
 

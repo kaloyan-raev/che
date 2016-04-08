@@ -25,7 +25,7 @@ public class GetEventsParams {
     private Filters filters;
 
     /**
-     * Creates get events arguments holder.
+     * Creates arguments holder.
      */
     public static GetEventsParams create() {
         return new GetEventsParams();

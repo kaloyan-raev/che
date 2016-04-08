@@ -12,6 +12,10 @@ package org.eclipse.che.plugin.docker.client.params;
 
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#startExec(StartExecParams, MessageProcessor)}.
  *
@@ -19,16 +23,30 @@ import org.eclipse.che.plugin.docker.client.MessageProcessor;
  */
 public class StartExecParams {
 
-    private String  id;
+    private String  execId;
     private Boolean detach;
     private Boolean tty;
+
+    /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param execId
+     *         info about this parameter @see {@link #withExecId(String)}
+     * @return arguments holder with required parameters
+     */
+    public static StartExecParams from(@NotNull String execId) {
+        return new StartExecParams().withExecId(execId);
+    }
+
+    private StartExecParams() {}
 
     /**
      * @param execId
      *         exec id
      */
-    public StartExecParams withExecId(String execId) {
-        id = execId;
+    public StartExecParams withExecId(@NotNull String execId) {
+        requireNonNull(execId);
+        this.execId = execId;
         return this;
     }
 
@@ -46,20 +64,20 @@ public class StartExecParams {
      * @param tty
      *         if {@code true} then will be allocated a pseudo-TTY
      */
-    public StartExecParams withExecId(boolean tty) {
+    public StartExecParams withTty(boolean tty) {
         this.tty = tty;
         return this;
     }
 
-    public String getExecId() {
-        return id;
+    public String execId() {
+        return execId;
     }
 
-    public Boolean isDetach() {
+    public Boolean detach() {
         return detach;
     }
 
-    public Boolean isTty() {
+    public Boolean tty() {
         return tty;
     }
 }

@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#killContainer(KillContainerParams)}.
  *
@@ -21,10 +25,24 @@ public class KillContainerParams {
     private Integer signal;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         info about this parameter @see {@link #withContainer(String)}
+     * @return arguments holder with required parameters
+     */
+    public static KillContainerParams from(@NotNull String container) {
+        return new KillContainerParams().withContainer(container);
+    }
+
+    private KillContainerParams() {}
+
+    /**
      * @param container
      *         container identifier, either id or name
      */
-    public KillContainerParams withContainer(String container) {
+    public KillContainerParams withContainer(@NotNull String container) {
+        requireNonNull(container);
         this.container = container;
         return this;
     }
@@ -38,11 +56,11 @@ public class KillContainerParams {
         return this;
     }
 
-    public String getContainer() {
+    public String container() {
         return container;
     }
 
-    public Integer getSignal() {
+    public Integer signal() {
         return signal;
     }
 

@@ -31,7 +31,7 @@ public class CreateContainerParams {
      *
      * @param containerConfig
      *         info about this parameter @see {@link #withContainerConfig(ContainerConfig)}
-     * @return create container arguments holder with required parameters
+     * @return arguments holder with required parameters
      */
     public static CreateContainerParams from(@NotNull ContainerConfig containerConfig) {
         return new CreateContainerParams().withContainerConfig(containerConfig);

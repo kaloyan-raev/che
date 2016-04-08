@@ -34,7 +34,7 @@ public class CommitParams {
      *         info about this parameter @see {@link #withContainer(String)}
      * @param repository
      *         info about this parameter @see {@link #withRepository(String)}
-     * @return push arguments holder with required parameters
+     * @return arguments holder with required parameters
      */
     public static CommitParams from(@NotNull String container, @NotNull String repository) {
         return new CommitParams().withContainer(container)

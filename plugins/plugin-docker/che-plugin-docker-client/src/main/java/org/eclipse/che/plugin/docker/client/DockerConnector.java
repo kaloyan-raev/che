@@ -252,12 +252,12 @@ public class DockerConnector {
                              long memoryLimit,
                              long memorySwapLimit,
                              File... files) throws IOException, InterruptedException {
-            return doBuildImage(new BuildImageParams().withRepository(repository)
-                                                      .withAuthConfigs(authConfigs)
-                                                      .withDoForcePull(doForcePull)
-                                                      .withMemoryLimit(memoryLimit)
-                                                      .withMemorySwapLimit(memorySwapLimit)
-                                                      .withFiles(files),
+            return doBuildImage(BuildImageParams.from(files)
+                                                .withRepository(repository)
+                                                .withAuthConfigs(authConfigs)
+                                                .withDoForcePull(doForcePull)
+                                                .withMemoryLimit(memoryLimit)
+                                                .withMemorySwapLimit(memorySwapLimit),
                                 progressMonitor,
                                 dockerDaemonUri);
     }
@@ -282,11 +282,9 @@ public class DockerConnector {
      *         docker service URI
      */
     protected ImageInfo doInspectImage(final InspectImageParams params, final URI dockerDaemonUri) throws IOException {
-        final String image = requiredNonNull(params.getImage(), "Inspect image: image parameter is null");
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
-                                                            .path("/images/" + image + "/json")) {
+                                                            .path("/images/" + params.image() + "/json")) {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
@@ -323,8 +321,8 @@ public class DockerConnector {
      */
     @Deprecated
     public void stopContainer(String container, long timeout, TimeUnit timeunit) throws IOException {
-        doStopContainer(new StopContainerParams().withContainer(container)
-                                                 .withTimeout(timeout, timeunit),
+        doStopContainer(StopContainerParams.from(container)
+                                           .withTimeout(timeout, timeunit),
                         dockerDaemonUri);
     }
 
@@ -335,15 +333,14 @@ public class DockerConnector {
      *         docker service URI
      */
     protected void doStopContainer(final StopContainerParams params, final URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Stop container: container identifier is null");
-        final Long timeout = params.getTimeunit() == null ? params.getTimeout() : params.getTimeunit().toSeconds(params.getTimeout());
+        final Long timeout = params.timeunit() == null ? params.timeout() : params.timeunit().toSeconds(params.timeout());
 
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
-                                                            .path("/containers/" + container + "/stop")
+                                                            .path("/containers/" + params.container() + "/stop")
                                                             .headers(headers)) {
             addQueryParamIfSet(connection, "t", timeout);
             final DockerResponse response = connection.request();
@@ -374,18 +371,15 @@ public class DockerConnector {
      *         docker service URI
      */
     protected void doKillContainer(final KillContainerParams params, final URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Send signal to container: container identifier is null");
-        final Integer signal = params.getSignal();
-
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
-                                                            .path("/containers/" + container + "/kill")
+                                                            .path("/containers/" + params.container() + "/kill")
                                                             .headers(headers)) {
-            addQueryParamIfSet(connection, "signal", signal);
+            addQueryParamIfSet(connection, "signal", params.signal());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (NO_CONTENT.getStatusCode() != status) {
@@ -403,9 +397,8 @@ public class DockerConnector {
      */
     @Deprecated
     public void killContainer(String container) throws IOException {
-        requiredNonNull(container, "Kill container: container identifier is null");
-        doKillContainer(new KillContainerParams().withContainer(container)
-                                                 .withSignal(9),
+        doKillContainer(KillContainerParams.from(container)
+                                           .withSignal(9),
                         dockerDaemonUri);
     }
 
@@ -435,9 +428,9 @@ public class DockerConnector {
      */
     @Deprecated
     public void removeContainer(String container, boolean force, boolean removeVolumes) throws IOException {
-        doRemoveContainer(new RemoveContainerParams().withContainer(container)
-                                                     .withForce(force)
-                                                     .withRemoveVolumes(removeVolumes),
+        doRemoveContainer(RemoveContainerParams.from(container)
+                                               .withForce(force)
+                                               .withRemoveVolumes(removeVolumes),
                           dockerDaemonUri);
     }
 
@@ -448,15 +441,11 @@ public class DockerConnector {
      *         docker service URI
      */
     protected void doRemoveContainer(RemoveContainerParams params, final URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Remove container: container identifier is null");
-        final Boolean force = params.isForce();
-        final Boolean removeVolumes = params.isRemoveVolumes();
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("DELETE")
-                                                            .path("/containers/" + container)) {
-            addQueryParamIfSet(connection, "force", force);
-            addQueryParamIfSet(connection, "v", removeVolumes);
+                                                            .path("/containers/" + params.container())) {
+            addQueryParamIfSet(connection, "force", params.force());
+            addQueryParamIfSet(connection, "v", params.removeVolumes());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (NO_CONTENT.getStatusCode() != status) {
@@ -489,7 +478,7 @@ public class DockerConnector {
      */
     @Deprecated
     public int waitContainer(String container) throws IOException {
-        return doWaitContainer(new WaitContainerParams().withContainer(container), dockerDaemonUri);
+        return doWaitContainer(WaitContainerParams.from(container), dockerDaemonUri);
     }
 
     /**
@@ -499,15 +488,13 @@ public class DockerConnector {
      *         docker service URI
      */
     protected int doWaitContainer(WaitContainerParams params, final URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Wait container: container identifier is null");
-
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
-                                                            .path("/containers/" + container + "/wait")
+                                                            .path("/containers/" + params.container() + "/wait")
                                                             .headers(headers)) {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
@@ -530,7 +517,7 @@ public class DockerConnector {
      */
     @Deprecated
     public ContainerInfo inspectContainer(String container) throws IOException {
-        return doInspectContainer(new InspectContainerParams().withContainer(container), dockerDaemonUri);
+        return doInspectContainer(InspectContainerParams.from(container), dockerDaemonUri);
     }
 
     /**
@@ -553,13 +540,10 @@ public class DockerConnector {
      *         docker service URI
      */
     protected ContainerInfo doInspectContainer(InspectContainerParams params, URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Inspect container: container id is null");
-        final Boolean size = params.isGetContainerSize();
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
-                                                            .path("/containers/" + container + "/json")) {
-            addQueryParamIfSet(connection, "size", size);
+                                                            .path("/containers/" + params.container() + "/json")) {
+            addQueryParamIfSet(connection, "size", params.returnContainerSize());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
@@ -759,7 +743,7 @@ public class DockerConnector {
 
     @Deprecated
     public void startExec(String execId, MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
-        doStartExec(new StartExecParams().withExecId(execId), execOutputProcessor, dockerDaemonUri);
+        doStartExec(StartExecParams.from(execId), execOutputProcessor, dockerDaemonUri);
     }
 
     /**
@@ -771,9 +755,8 @@ public class DockerConnector {
     protected void doStartExec(StartExecParams params,
                                final MessageProcessor<LogMessage> execOutputProcessor,
                                final URI dockerDaemonUri) throws IOException {
-        final String execId = requiredNonNull(params.getExecId(), "Start exec: exec id is null");
-        final Boolean detach = params.isDetach();
-        final Boolean tty = params.isTty();
+        final Boolean detach = params.detach();
+        final Boolean tty = params.tty();
 
         final ExecStart execStart = new ExecStart().withDetach(execOutputProcessor == null);
         if (detach != null) {
@@ -789,7 +772,7 @@ public class DockerConnector {
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
-                                                            .path("/exec/" + execId + "/start")
+                                                            .path("/exec/" + params.execId() + "/start")
                                                             .headers(headers)
                                                             .entity(entity)) {
 
@@ -829,7 +812,7 @@ public class DockerConnector {
      */
     @Deprecated
     public ExecInfo getExecInfo(String execId) throws IOException {
-        return doGetExecInfo(new GetExecInfoParams().withExecId(execId), dockerDaemonUri);
+        return doGetExecInfo(GetExecInfoParams.from(execId), dockerDaemonUri);
     }
 
     /**
@@ -839,11 +822,9 @@ public class DockerConnector {
      *         docker service URI
      */
     protected ExecInfo doGetExecInfo(final GetExecInfoParams params, final URI dockerDaemonUri) throws IOException {
-        final String execId = requiredNonNull(params.getExecId(), "Get exec info: exec id is null");
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
-                                                            .path("/exec/" + execId + "/json")) {
+                                                            .path("/exec/" + params.execId() + "/json")) {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
@@ -870,8 +851,8 @@ public class DockerConnector {
 
     @Deprecated
     public ContainerProcesses top(String container, String... psArgs) throws IOException {
-        return doTop(new TopParams().withContainer(container)
-                                    .withPsArgs(psArgs),
+        return doTop(TopParams.from(container)
+                              .withPsArgs(psArgs),
                      dockerDaemonUri);
     }
 
@@ -882,15 +863,14 @@ public class DockerConnector {
      *         docker service URI
      */
     protected ContainerProcesses doTop(final TopParams params, final URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Top: container id is null");
-        final String[] psArgs = params.getPsArgs();
+        final String[] psArgs = params.psArgs();
 
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
         final DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                              .method("GET")
-                                                             .path("/containers/" + container + "/top")
+                                                             .path("/containers/" + params.container() + "/top")
                                                              .headers(headers);
         if (psArgs != null && psArgs.length != 0) {
             StringBuilder psArgsQueryBuilder = new StringBuilder();
@@ -1008,10 +988,9 @@ public class DockerConnector {
                             String targetPath,
                             InputStream sourceStream,
                             boolean noOverwriteDirNonDir) throws IOException {
-       doPutResource(new PutResourceParams().withContainer(container)
-                                            .withTargetPath(targetPath)
-                                            .withSourceStream(sourceStream)
-                                            .withNoOverwriteDirNonDir(noOverwriteDirNonDir),
+       doPutResource(PutResourceParams.from(container, targetPath)
+                                      .withSourceStream(sourceStream)
+                                      .withNoOverwriteDirNonDir(noOverwriteDirNonDir),
                      dockerDaemonUri);
     }
 
@@ -1022,14 +1001,9 @@ public class DockerConnector {
      *         docker service URI
      */
     protected void doPutResource(final PutResourceParams params, final URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Put resource: container id is null");
-        final String targetPath = requiredNonNull(params.getTargetPath(), "Put resource: target path is not set");
-        final InputStream sourceStream = params.getSourceStream();
-        final Boolean noOverwriteDirNonDir = params.isNoOverwriteDirNonDir();
-
         File tarFile;
         long length;
-        try (InputStream sourceData = sourceStream) {
+        try (InputStream sourceData = params.sourceStream()) {
             Path tarFilePath = Files.createTempFile("compressed-resources", ".tar");
             tarFile = tarFilePath.toFile();
             length = Files.copy(sourceData, tarFilePath, StandardCopyOption.REPLACE_EXISTING);
@@ -1040,11 +1014,11 @@ public class DockerConnector {
         try (InputStream tarStream = new BufferedInputStream(new FileInputStream(tarFile));
              DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("PUT")
-                                                            .path("/containers/" + container + "/archive")
-                                                            .query("path", targetPath)
+                                                            .path("/containers/" + params.container() + "/archive")
+                                                            .query("path", params.targetPath())
                                                             .headers(headers)
                                                             .entity(tarStream)) {
-            addQueryParamIfSet(connection, "noOverwriteDirNonDir", noOverwriteDirNonDir);
+            addQueryParamIfSet(connection, "noOverwriteDirNonDir", params.noOverwriteDirNonDir());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status != OK.getStatusCode()) {
@@ -1249,8 +1223,8 @@ public class DockerConnector {
 
     @Deprecated
     public void removeImage(String image, boolean force) throws IOException {
-        doRemoveImage(new RemoveImageParams().withImage(image)
-                                             .withForce(force),
+        doRemoveImage(RemoveImageParams.from(image)
+                                       .withForce(force),
                       dockerDaemonUri);
     }
 
@@ -1273,13 +1247,10 @@ public class DockerConnector {
      *         docker service URI
      */
     protected void doRemoveImage(final RemoveImageParams params, final URI dockerDaemonUri) throws IOException {
-        final String image = requiredNonNull(params.getImage(), "Remove image: image name is null");
-        final Boolean force = params.isForce();
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("DELETE")
-                                                            .path("/images/" + image)) {
-            addQueryParamIfSet(connection, "force", force);
+                                                            .path("/images/" + params.image())) {
+            addQueryParamIfSet(connection, "force", params.force());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
@@ -1290,10 +1261,9 @@ public class DockerConnector {
 
     @Deprecated
     public void tag(String image, String repository, String tag) throws IOException {
-       doTag(new TagParams().withImage(image)
-                            .withRepository(repository)
-                            .withTag(tag)
-                            .withForce(false),
+       doTag(TagParams.from(image, repository)
+                      .withTag(tag)
+                      .withForce(false),
              dockerDaemonUri);
     }
 
@@ -1316,22 +1286,17 @@ public class DockerConnector {
      *         docker service URI
      */
     protected void doTag(final TagParams params, final URI dockerDaemonUri) throws IOException {
-        final String image = requiredNonNull(params.getImage(), "Tag: image name is null");
-        final String repository = requiredNonNull(params.getRepository(), "Tag: repository is null");
-        final String tag = params.getTag();
-        final Boolean force = params.isForce();
-
         final List<Pair<String, ?>> headers = new ArrayList<>(3);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
-                                                            .path("/images/" + image + "/tag")
-                                                            .query("repo", repository)
+                                                            .path("/images/" + params.image() + "/tag")
+                                                            .query("repo", params.repository())
                                                             .headers(headers)) {
-            addQueryParamIfSet(connection, "force", force);
-            addQueryParamIfSet(connection, "tag", tag);
+            addQueryParamIfSet(connection, "force", params.force());
+            addQueryParamIfSet(connection, "tag", params.tag());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status / 100 != 2) {
@@ -1549,9 +1514,9 @@ public class DockerConnector {
                      String tag,
                      String registry,
                      final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        doPull(new PullParams().withImage(image)
-                               .withTag(tag)
-                               .withRegistry(registry),
+        doPull(PullParams.from(image)
+                         .withTag(tag)
+                         .withRegistry(registry),
                progressMonitor,
                dockerDaemonUri);
     }
@@ -1591,9 +1556,8 @@ public class DockerConnector {
     protected void doPull(final PullParams params,
                           final ProgressMonitor progressMonitor,
                           final URI dockerDaemonUri) throws IOException, InterruptedException {
-        final String image = requiredNonNull(params.getImage(), "Pull: image is null");
-        final String tag = params.getTag();
-        final String registry = params.getRegistry();
+        final String image = params.image();
+        final String registry = params.registry();
 
         final List<Pair<String, ?>> headers = new ArrayList<>(3);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
@@ -1605,7 +1569,7 @@ public class DockerConnector {
                                                             .path("/images/create")
                                                             .query("fromImage", registry != null ? registry + "/" + image : image)
                                                             .headers(headers)) {
-            addQueryParamIfSet(connection, "tag", tag);
+            addQueryParamIfSet(connection, "tag", params.tag());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
@@ -1743,14 +1707,12 @@ public class DockerConnector {
      *         docker service URI
      */
     protected void doStartContainer(final StartContainerParams params, final URI dockerDaemonUri) throws IOException {
-        final String container = requiredNonNull(params.getContainer(), "Start container: container id is null");
-
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
-                                                            .path("/containers/" + container + "/start")
+                                                            .path("/containers/" + params.container() + "/start")
                                                             .headers(headers)) {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
@@ -1826,24 +1788,18 @@ public class DockerConnector {
      * @param paramValue
      *         value of query parameter
      */
-    public void addQueryParamIfSet(DockerConnection connection, String queryParamName, Object paramValue) {
+    private void addQueryParamIfSet(DockerConnection connection, String queryParamName, Object paramValue) {
         if (paramValue != null && queryParamName != null && !queryParamName.equals("")) {
             connection.query(queryParamName, paramValue);
         }
     }
 
     /**
-     * Adds given boolean parameter to query if it set (not null).
-     * In case of {@code true} '1' will be added, in case of {@code false} '0'.
+     * The same as {@link #addQueryParamIfSet(DockerConnection, String, Object)}, but
+     * in case of {@code paramValue} is {@code true} '1' will be added as parameter value, in case of {@code false} '0'.
      *
-     * @param connection
-     *         connection to docker service
-     * @param queryParamName
-     *         name of query parameter
-     * @param paramValue
-     *         value of query parameter
      */
-    public void addQueryParamIfSet(DockerConnection connection, String queryParamName, Boolean paramValue) {
+    private void addQueryParamIfSet(DockerConnection connection, String queryParamName, Boolean paramValue) {
         if (paramValue != null && queryParamName != null && !queryParamName.equals("")) {
             connection.query(queryParamName, paramValue ? 1 : 0);
         }

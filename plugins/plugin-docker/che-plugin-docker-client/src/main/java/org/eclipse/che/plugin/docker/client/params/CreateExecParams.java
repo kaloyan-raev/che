@@ -32,7 +32,7 @@ public class CreateExecParams {
      *         info about this parameter @see {@link #withContainer(String)}
      * @param cmd
      *         info about this parameter @see {@link #withCmd(String[])}
-     * @return create exec arguments holder with required parameters
+     * @return arguments holder with required parameters
      */
     public static CreateExecParams from(@NotNull String container, @NotNull String[] cmd) {
         return new CreateExecParams().withContainer(container)

@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#stopContainer(StopContainerParams)}.
@@ -24,10 +27,24 @@ public class StopContainerParams {
     private TimeUnit timeunit;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         info about this parameter @see {@link #withContainer(String)}
+     * @return arguments holder with required parameters
+     */
+    public static StopContainerParams from(@NotNull String container) {
+        return new StopContainerParams().withContainer(container);
+    }
+
+    private StopContainerParams() {}
+
+    /**
      * @param container
      *         container identifier, either id or name
      */
-    public StopContainerParams withContainer(String container) {
+    public StopContainerParams withContainer(@NotNull String container) {
+        requireNonNull(container);
         this.container = container;
         return this;
     }
@@ -53,15 +70,15 @@ public class StopContainerParams {
         return this;
     }
 
-    public String getContainer() {
+    public String container() {
         return container;
     }
 
-    public Long getTimeout() {
+    public Long timeout() {
         return timeout;
     }
 
-    public TimeUnit getTimeunit() {
+    public TimeUnit timeunit() {
         return timeunit;
     }
 

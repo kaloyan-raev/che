@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import javax.validation.constraints.NotNull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for{@link org.eclipse.che.plugin.docker.client.DockerConnector#inspectContainer(InspectContainerParams)}.
  *
@@ -21,28 +25,42 @@ public class InspectContainerParams {
     private Boolean returnContainerSize;
 
     /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         info about this parameter @see {@link #withContainer(String)}
+     * @return arguments holder with required parameters
+     */
+    public static InspectContainerParams from(@NotNull String container) {
+        return new InspectContainerParams().withContainer(container);
+    }
+
+    private InspectContainerParams() {}
+
+    /**
      * @param container
      *         id or name of container
      */
-    public InspectContainerParams withContainer(String container) {
+    public InspectContainerParams withContainer(@NotNull String container) {
+        requireNonNull(container);
         this.container = container;
         return this;
     }
 
     /**
-     * @param getContainerSize
+     * @param returnContainerSize
      *         if {@code true} it will return container size information
      */
-    public InspectContainerParams withReturnContainerSize(boolean getContainerSize) {
-        this.returnContainerSize = getContainerSize;
+    public InspectContainerParams withReturnContainerSize(boolean returnContainerSize) {
+        this.returnContainerSize = returnContainerSize;
         return this;
     }
 
-    public String getContainer() {
+    public String container() {
         return container;
     }
 
-    public Boolean isGetContainerSize() {
+    public Boolean returnContainerSize() {
         return returnContainerSize;
     }
 
