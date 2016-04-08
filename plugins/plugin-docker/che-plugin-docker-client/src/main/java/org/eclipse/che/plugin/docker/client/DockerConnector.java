@@ -628,52 +628,6 @@ public class DockerConnector {
     }
 
     /**
-     * Copies file or directory {@code path} from {@code container} to the {code hostPath}.
-     *
-     * @param container
-     *         container id
-     * @param path
-     *         path to file or directory inside container
-     * @param hostPath
-     *         path to the directory on host filesystem
-     * @throws IOException
-     * @deprecated since 1.20 docker api in favor of the {@link #getResource(String, String)}
-     * and {@link #putResource(String, String, InputStream, boolean) putResource}
-     */
-    @Deprecated
-    public void copy(String container, String path, File hostPath) throws IOException {
-        final String entity = JsonHelper.toJson(new ContainerResource().withResource(path), FIRST_LETTER_LOWERCASE);
-        final List<Pair<String, ?>> headers = new ArrayList<>(2);
-        headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
-        headers.add(Pair.of("Content-Length", entity.getBytes().length));
-
-        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                            .method("POST")
-                                                            .path(String.format("/containers/%s/copy", container))
-                                                            .headers(headers)
-                                                            .entity(entity)) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
-            // TarUtils uses apache commons compress library for working with tar archive and it fails
-            // (e.g. doesn't unpack all files from archive in case of coping directory) when we try to use stream from docker remote API.
-            // Docker sends tar contents as sequence of chunks and seems that causes problems for apache compress library.
-            // The simplest solution is spool content to temporary file and then unpack it to destination folder.
-            final Path spoolFilePath = Files.createTempFile("docker-copy-spool-", ".tar");
-            try (InputStream is = response.getInputStream()) {
-                Files.copy(is, spoolFilePath, StandardCopyOption.REPLACE_EXISTING);
-                try (InputStream tarStream = Files.newInputStream(spoolFilePath)) {
-                    TarUtils.untar(tarStream, hostPath);
-                }
-            } finally {
-                FileCleaner.addFile(spoolFilePath.toFile());
-            }
-        }
-    }
-
-    /**
      * Sets up an exec instance in a running container.
      *
      * @param params
