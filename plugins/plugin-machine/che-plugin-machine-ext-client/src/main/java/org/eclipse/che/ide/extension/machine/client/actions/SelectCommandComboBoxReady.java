@@ -73,24 +73,26 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
                                                                                      WsAgentStateHandler,
                                                                                      MachineStateHandler {
 
-    public static final String GROUP_COMMANDS = "CommandsGroup";
-    public static final String GROUP_MACHINES = "MachinesGroup";
-
-    private static final Comparator<CommandConfiguration> commandsComparator = new CommandsComparator();
-
-    private final DropDownWidget          commandsListWidget;
-    private final DropDownWidget          machinesListWidget;
-    private final String                  workspaceId;
-    private final ActionManager           actionManager;
-    private final WorkspaceServiceClient  workspaceServiceClient;
-    private final MachineServiceClient    machineServiceClient;
-    private final CommandTypeRegistry     commandTypeRegistry;
-    private final MachineResources        resources;
-    private final Map<String, MachineDto> registeredMachineMap;
-
-    private List<CommandConfiguration> commands;
-    private DefaultActionGroup         commandActions;
-    private DefaultActionGroup         machinesActions;
+    public static final String              GROUP_COMMANDS                 = "CommandsGroup";
+    public static final String              GROUP_MACHINES                 = "MachinesGroup";
+    public static final Map<String, String> MACHINE_CATEGORIES_BY_TYPE_MAP = new HashMap<String, String>() {
+        {
+            put("persistent", "ssh");
+        }
+    };
+    private final MachineLocalizationConstant locale;
+    private final MachineResources            resources;
+    private final Map<String, MachineDto>     registeredMachineMap;
+    private final ActionManager               actionManager;
+    private final WorkspaceServiceClient      workspaceServiceClient;
+    private final MachineServiceClient        machineServiceClient;
+    private final CommandTypeRegistry         commandTypeRegistry;
+    private final DropDownWidget              commandsListWidget;
+    private final DropDownWidget              machinesListWidget;
+    private final List<CommandConfiguration>  commands;
+    private final String                      workspaceId;
+    private final DefaultActionGroup          commandActions;
+    private final DefaultActionGroup          machinesActions;
 
     @Inject
     public SelectCommandComboBoxReady(MachineLocalizationConstant locale,
@@ -107,6 +109,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
               locale.selectCommandControlTitle(),
               locale.selectCommandControlDescription(),
               null, null);
+        this.locale = locale;
         this.resources = resources;
         this.actionManager = actionManager;
         this.workspaceServiceClient = workspaceServiceClient;
@@ -244,11 +247,16 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
         commandActions.removeAll();
 
         final DefaultActionGroup commandsList = (DefaultActionGroup)actionManager.getAction(GROUP_COMMANDS_LIST);
-        if(commandsList != null) {
+        if (commandsList != null) {
             commandActions.addAll(commandsList);
         }
 
-        Collections.sort(commandConfigurations, commandsComparator);
+        Collections.sort(commandConfigurations, new Comparator<CommandConfiguration>() {
+            @Override
+            public int compare(CommandConfiguration o1, CommandConfiguration o2) {
+                return o1.getType().getId().compareTo(o2.getType().getId());
+            }
+        });
         CommandConfiguration prevCommand = null;
         for (CommandConfiguration configuration : commandConfigurations) {
             if (prevCommand == null || !configuration.getType().getId().equals(prevCommand.getType().getId())) {
@@ -392,8 +400,8 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
         for (Map.Entry<String, MachineDto> machineEntry : machineEntryList) {
             final MachineDto machine = machineEntry.getValue();
             final MachineConfigDto machineConfig = machine.getConfig();
-            if (machineConfig.isDev() || machineCategory == null || !machineConfig.getType().equals(machineCategory)) {
-                machineCategory = machineConfig.isDev() ? "Development" : machine.getConfig().getType();
+            if (!this.getMachineCategory(machineConfig).equals(machineCategory)) {
+                machineCategory = getMachineCategory(machineConfig);
                 machinesActions.addSeparator(machineCategory);
             }
             machinesActions.add(machinesListWidget.createAction(machine.getId(), machineConfig.getName()));
@@ -410,7 +418,16 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
         }
     }
 
-    private static class MachineDtoListEntryComparator implements Comparator<Map.Entry<String, MachineDto>> {
+    private String getMachineCategory(MachineConfigDto machineConfig) {
+        if (machineConfig.isDev()) {
+            return this.locale.selectMachineDevCategory();
+        }
+        final String machineType = machineConfig.getType();
+
+        return MACHINE_CATEGORIES_BY_TYPE_MAP.containsKey(machineType) ? MACHINE_CATEGORIES_BY_TYPE_MAP.get(machineType) : machineType;
+    }
+
+    private class MachineDtoListEntryComparator implements Comparator<Map.Entry<String, MachineDto>> {
         @Override
         public int compare(Map.Entry<String, MachineDto> o1, Map.Entry<String, MachineDto> o2) {
             final MachineDto firstMachine = o1.getValue();
@@ -437,14 +454,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
                 return (firstMachineConfig.getName()).compareToIgnoreCase(secondMachineConfig.getName());
             }
 
-            return (firstMachineConfig.getType()).compareToIgnoreCase(secondMachineConfig.getType());
-        }
-    }
-
-    private static class CommandsComparator implements Comparator<CommandConfiguration> {
-        @Override
-        public int compare(CommandConfiguration o1, CommandConfiguration o2) {
-            return o1.getType().getId().compareTo(o2.getType().getId());
+            return (getMachineCategory(firstMachineConfig)).compareToIgnoreCase(getMachineCategory(secondMachineConfig));
         }
     }
 }
