@@ -51,7 +51,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -603,11 +602,6 @@ public class DebuggerTest extends BaseTest {
             super(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus, fqnResolverFactory, activeFileHandler,
                   debuggerManager,
                   fileTypeRegistry, id, eventChannel);
-        }
-
-        @Override
-        protected List<String> resolveFilePathByLocation(@NotNull Location location) {
-            return Collections.emptyList();
         }
 
         @Override

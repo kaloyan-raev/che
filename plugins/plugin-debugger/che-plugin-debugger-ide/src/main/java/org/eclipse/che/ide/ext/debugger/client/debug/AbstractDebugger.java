@@ -216,8 +216,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             final Location fLocation = location;
             if (location != null) {
                 currentLocation = location;
-                activeFileHandler.openFile(resolveFilePathByLocation(location),
-                                           location.getClassName(),
+                activeFileHandler.openFile(location.getClassName(),
                                            location.getLineNumber(),
                                            new AsyncCallback<VirtualFile>() {
                                                @Override
@@ -249,11 +248,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
      * <li>etc</li>
      */
     private void onBreakpointActivated(Location location) {
-        List<String> filePaths = resolveFilePathByLocation(location);
-        for (String filePath : filePaths) {
-            for (DebuggerObserver observer : observers) {
-                observer.onBreakpointActivated(filePath, location.getLineNumber() - 1);
-            }
+        for (DebuggerObserver observer : observers) {
+            observer.onBreakpointActivated(location.getClassName(), location.getLineNumber() - 1);
         }
     }
 
@@ -665,15 +661,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         DebuggerInfo debuggerInfo = dtoFactory.createDtoFromJson(data, DebuggerInfo.class);
         setDebuggerInfo(debuggerInfo);
     }
-
-    /**
-     * Create file path from {@link Location}.
-     *
-     * @param location
-     *         location of class
-     * @return file path
-     */
-    abstract protected List<String> resolveFilePathByLocation(@NotNull Location location);
 
     abstract protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);
 }

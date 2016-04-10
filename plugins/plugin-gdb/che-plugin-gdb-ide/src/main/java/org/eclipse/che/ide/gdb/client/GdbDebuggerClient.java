@@ -19,13 +19,9 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.debugger.client.debug.AbstractDebugger;
 import org.eclipse.che.ide.ext.debugger.client.fqn.FqnResolverFactory;
-import org.eclipse.che.ide.ext.debugger.shared.Location;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 
-import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.ide.gdb.client.GdbDebuggerClient.ConnectionProperties.HOST;
@@ -63,12 +59,6 @@ public class GdbDebuggerClient extends AbstractDebugger {
               fileTypeRegistry,
               ID,
               EVENTS_CHANNEL);
-    }
-
-    @Override
-    protected List<String> resolveFilePathByLocation(@NotNull Location location) {
-        Collections.singleton(location.getClassName());
-        return Collections.singletonList(location.getClassName());
     }
 
     @Override
