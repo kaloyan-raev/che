@@ -12,8 +12,8 @@ package org.eclipse.che.ide.gdb.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerServiceClient;
@@ -52,7 +52,7 @@ public class GdbDebuggerServiceClientImpl implements DebuggerServiceClient {
     private final DtoUnmarshallerFactory          dtoUnmarshallerFactory;
 
     @Inject
-    protected GdbDebuggerServiceClientImpl(@Named("cheExtensionPath") String extPath,
+    protected GdbDebuggerServiceClientImpl(WsAgentUrlProvider urlProvider,
                                            AppContext appContext,
                                            LoaderFactory loaderFactory,
                                            AsyncRequestFactory asyncRequestFactory,
@@ -60,7 +60,7 @@ public class GdbDebuggerServiceClientImpl implements DebuggerServiceClient {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.baseUrl = extPath + "/gdb/" + appContext.getWorkspace().getId();
+        this.baseUrl = urlProvider.get() + "/gdb/" + appContext.getWorkspaceId();
     }
 
     @Override
