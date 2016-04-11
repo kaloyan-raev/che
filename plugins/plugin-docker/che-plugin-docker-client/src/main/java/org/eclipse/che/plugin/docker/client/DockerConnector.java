@@ -33,7 +33,6 @@ import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
-import org.eclipse.che.plugin.docker.client.json.ContainerResource;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.ExecConfig;
 import org.eclipse.che.plugin.docker.client.json.ExecCreated;
@@ -135,16 +134,6 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public org.eclipse.che.plugin.docker.client.json.SystemInfo getSystemInfo() throws IOException {
-        return doGetSystemInfo(dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #getSystemInfo()} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected org.eclipse.che.plugin.docker.client.json.SystemInfo doGetSystemInfo(final URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/info")) {
@@ -167,16 +156,6 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public Version getVersion() throws IOException {
-        return doGetVersion(dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #getVersion()} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected Version doGetVersion(final URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/version")) {
@@ -199,16 +178,6 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public Image[] listImages() throws IOException {
-        return doListImages(dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #listImages()} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected Image[] doListImages(final URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/images/json")) {
@@ -243,6 +212,7 @@ public class DockerConnector {
      * @throws IOException
      * @throws InterruptedException
      *         if build process was interrupted
+     * @deprecated use {@link #buildImage(BuildImageParams, ProgressMonitor)} instead
      */
     @Deprecated
     public String buildImage(String repository,
@@ -265,23 +235,11 @@ public class DockerConnector {
     /**
      * Gets detailed information about docker image.
      *
-     * @param params
-     *         parameters holder
      * @return detailed information about {@code image}
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public ImageInfo inspectImage(InspectImageParams params) throws IOException {
-        return doInspectImage(params, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #inspectImage(InspectImageParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected ImageInfo doInspectImage(final InspectImageParams params, final URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/images/" + params.image() + "/json")) {
@@ -297,18 +255,6 @@ public class DockerConnector {
     }
 
     /**
-     * Stops docker container.
-     *
-     * @param params
-     *         parameters holder
-     * @throws IOException
-     *         when problems occurs with docker api calls
-     */
-    public void stopContainer(final StopContainerParams params) throws IOException {
-        doStopContainer(params, dockerDaemonUri);
-    }
-
-    /**
      * Stops container.
      *
      * @param container
@@ -318,22 +264,23 @@ public class DockerConnector {
      * @param timeunit
      *         time unit of the timeout parameter
      * @throws IOException
+     * @deprecated use {@link #stopContainer(StopContainerParams)} instead
      */
     @Deprecated
     public void stopContainer(String container, long timeout, TimeUnit timeunit) throws IOException {
-        doStopContainer(StopContainerParams.from(container)
-                                           .withTimeout(timeout, timeunit),
-                        dockerDaemonUri);
+        stopContainer(StopContainerParams.from(container)
+                                           .withTimeout(timeout, timeunit));
     }
 
     /**
-     * The same as {@link #stopContainer(StopContainerParams)} but with additional parameter
+     * Stops container.
      *
-     * @param dockerDaemonUri
-     *         docker service URI
+     * @throws IOException
+     *         when problems occurs with docker api calls
      */
-    protected void doStopContainer(final StopContainerParams params, final URI dockerDaemonUri) throws IOException {
-        final Long timeout = params.timeunit() == null ? params.timeout() : params.timeunit().toSeconds(params.timeout());
+    public void stopContainer(final StopContainerParams params) throws IOException {
+        final Long timeout = (params.timeunit() == null) ?
+                             params.timeout() : params.timeunit().toSeconds(params.timeout());
 
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
@@ -355,22 +302,10 @@ public class DockerConnector {
      * Sends specified signal to running container.
      * If signal not set, then SIGKILL will be used.
      *
-     * @param params
-     *         parameters holder
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public void killContainer(final KillContainerParams params) throws IOException {
-        doKillContainer(params, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #killContainer(KillContainerParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected void doKillContainer(final KillContainerParams params, final URI dockerDaemonUri) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
@@ -394,24 +329,12 @@ public class DockerConnector {
      * @param container
      *         container identifier, either id or name
      * @throws IOException
+     * @deprecated use {@link #killContainer(KillContainerParams)} instead
      */
     @Deprecated
     public void killContainer(String container) throws IOException {
-        doKillContainer(KillContainerParams.from(container)
-                                           .withSignal(9),
-                        dockerDaemonUri);
-    }
-
-    /**
-     * Removes docker container.
-     *
-     * @param params
-     *         parameters holder
-     * @throws IOException
-     *         when problems occurs with docker api calls
-     */
-    public void removeContainer(final RemoveContainerParams params) throws IOException {
-        doRemoveContainer(params, dockerDaemonUri);
+        killContainer(KillContainerParams.from(container)
+                                         .withSignal(9));
     }
 
     /**
@@ -425,22 +348,22 @@ public class DockerConnector {
      *         if {@code true} removes volumes associated to the container
      * @throws IOException
      *         when problems occurs with docker api calls
+     * @deprecated use {@link #removeContainer(RemoveContainerParams)} instead
      */
     @Deprecated
     public void removeContainer(String container, boolean force, boolean removeVolumes) throws IOException {
-        doRemoveContainer(RemoveContainerParams.from(container)
-                                               .withForce(force)
-                                               .withRemoveVolumes(removeVolumes),
-                          dockerDaemonUri);
+        removeContainer(RemoveContainerParams.from(container)
+                                             .withForce(force)
+                                             .withRemoveVolumes(removeVolumes));
     }
 
     /**
-     * The same as {@link #removeContainer(RemoveContainerParams)} but with additional parameter
+     * Removes docker container.
      *
-     * @param dockerDaemonUri
-     *         docker service URI
+     * @throws IOException
+     *         when problems occurs with docker api calls
      */
-    protected void doRemoveContainer(RemoveContainerParams params, final URI dockerDaemonUri) throws IOException {
+    public void removeContainer(final RemoveContainerParams params) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("DELETE")
                                                             .path("/containers/" + params.container())) {
@@ -457,37 +380,11 @@ public class DockerConnector {
     /**
      * Blocks until container stops, then returns the exit code
      *
-     * @param params
-     *         parameters holder
      * @return exit code
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public int waitContainer(final WaitContainerParams params) throws IOException {
-        return doWaitContainer(params, dockerDaemonUri);
-    }
-
-    /**
-     * Blocks until {@code container} stops, then returns the exit code.
-     *
-     * @param container
-     *         container identifier, either id or name
-     * @return exit code
-     * @throws IOException
-     *         when problems occurs with docker api calls
-     */
-    @Deprecated
-    public int waitContainer(String container) throws IOException {
-        return doWaitContainer(WaitContainerParams.from(container), dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #waitContainer(WaitContainerParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected int doWaitContainer(WaitContainerParams params, final URI dockerDaemonUri) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
@@ -514,32 +411,21 @@ public class DockerConnector {
      *         id of container
      * @return detailed information about {@code container}
      * @throws IOException
+     * @deprecated use {@link #inspectContainer(InspectContainerParams)} instead
      */
     @Deprecated
     public ContainerInfo inspectContainer(String container) throws IOException {
-        return doInspectContainer(InspectContainerParams.from(container), dockerDaemonUri);
+        return inspectContainer(InspectContainerParams.from(container));
     }
 
     /**
      * Gets detailed information about docker container.
      *
-     * @param params
-     *         parameters holder
      * @return detailed information about {@code container}
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public ContainerInfo inspectContainer(final InspectContainerParams params) throws IOException {
-        return doInspectContainer(params, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #inspectContainer(InspectContainerParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected ContainerInfo doInspectContainer(InspectContainerParams params, URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/" + params.container() + "/json")) {
@@ -557,12 +443,10 @@ public class DockerConnector {
 
     /**
      * Attaches to the container with specified id.
-     *
-     * @param params
-     *         parameters holder
-     *         if @{code stream} parameter is {@code true} then get 'live' stream from container.
-     *         Typically need to run this method in separate thread, if {@code
-     *         stream} is {@code true} since this method blocks until container is running.
+     * <br/>
+     * Note, that if @{code stream} parameter is {@code true} then get 'live' stream from container.
+     * Typically need to run this method in separate thread, if {@code stream}
+     * is {@code true} since this method blocks until container is running.
      * @param containerLogsProcessor
      *         output for container logs
      * @throws IOException
@@ -570,18 +454,6 @@ public class DockerConnector {
      */
     public void attachContainer(final AttachContainerParams params, MessageProcessor<LogMessage> containerLogsProcessor)
             throws IOException {
-        doAttachContainer(params, containerLogsProcessor, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #attachContainer(AttachContainerParams, MessageProcessor)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected void doAttachContainer(final AttachContainerParams params,
-                                     final MessageProcessor<LogMessage> containerLogsProcessor,
-                                     final URI dockerDaemonUri) throws IOException {
         final Boolean stream = params.stream();
 
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
@@ -618,42 +490,29 @@ public class DockerConnector {
      *         if {@code true} then get 'live' stream from container. Typically need to run this method in separate thread, if {@code
      *         stream} is {@code true} since this method blocks until container is running.
      * @throws IOException
+     * @deprecated use {@link #attachContainer(AttachContainerParams, MessageProcessor)} instead
      */
     @Deprecated
     public void attachContainer(String container, MessageProcessor<LogMessage> containerLogsProcessor, boolean stream) throws IOException {
-        doAttachContainer(AttachContainerParams.from(container)
-                                               .withStream(stream),
-                          containerLogsProcessor,
-                          dockerDaemonUri);
+        attachContainer(AttachContainerParams.from(container)
+                                             .withStream(stream),
+                        containerLogsProcessor);
+    }
+
+    @Deprecated
+    public Exec createExec(String container, boolean detach, String... cmd) throws IOException {
+        return createExec(CreateExecParams.from(container, cmd)
+                                            .withDetach(detach));
     }
 
     /**
      * Sets up an exec instance in a running container.
      *
-     * @param params
-     *         parameters holder
      * @return just created exec info
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public Exec createExec(final CreateExecParams params) throws IOException {
-        return doCreateExec(params, dockerDaemonUri);
-    }
-
-    @Deprecated
-    public Exec createExec(String container, boolean detach, String... cmd) throws IOException {
-        return doCreateExec(CreateExecParams.from(container, cmd)
-                                            .withDetach(detach),
-                            dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #createContainer(CreateContainerParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected Exec doCreateExec(final CreateExecParams params, final URI dockerDaemonUri) throws IOException {
         final String[] cmd = params.cmd();
 
         final ExecConfig execConfig = new ExecConfig().withCmd(cmd);
@@ -682,33 +541,22 @@ public class DockerConnector {
     }
 
     /**
+     * @deprecated use {@link #startExec(StartExecParams, MessageProcessor)} instead
+     */
+    @Deprecated
+    public void startExec(String execId, MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
+        startExec(StartExecParams.from(execId), execOutputProcessor);
+    }
+
+    /**
      * Starts a previously set up exec instance.
      *
-     * @param params
-     *         parameters holder
      * @param execOutputProcessor
      *         processor for exec output
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public void startExec(final StartExecParams params, MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
-        doStartExec(params, execOutputProcessor, dockerDaemonUri);
-    }
-
-    @Deprecated
-    public void startExec(String execId, MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
-        doStartExec(StartExecParams.from(execId), execOutputProcessor, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #startExec(StartExecParams, MessageProcessor)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected void doStartExec(StartExecParams params,
-                               final MessageProcessor<LogMessage> execOutputProcessor,
-                               final URI dockerDaemonUri) throws IOException {
         final Boolean detach = params.detach();
         final Boolean tty = params.tty();
 
@@ -748,14 +596,13 @@ public class DockerConnector {
     /**
      * Gets detailed information about exec
      *
-     * @param params
-     *         parameters holder
      * @return detailed information about {@code execId}
      * @throws IOException
-     *         when problems occurs with docker api calls
+     * @deprecated use {@link #getExecInfo(GetExecInfoParams)} instead
      */
-    public ExecInfo getExecInfo(final GetExecInfoParams params) throws IOException {
-        return doGetExecInfo(params, dockerDaemonUri);
+    @Deprecated
+    public ExecInfo getExecInfo(String execId) throws IOException {
+        return getExecInfo(GetExecInfoParams.from(execId));
     }
 
     /**
@@ -763,19 +610,9 @@ public class DockerConnector {
      *
      * @return detailed information about {@code execId}
      * @throws IOException
+     *         when problems occurs with docker api calls
      */
-    @Deprecated
-    public ExecInfo getExecInfo(String execId) throws IOException {
-        return doGetExecInfo(GetExecInfoParams.from(execId), dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #getExecInfo(GetExecInfoParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected ExecInfo doGetExecInfo(final GetExecInfoParams params, final URI dockerDaemonUri) throws IOException {
+    public ExecInfo getExecInfo(final GetExecInfoParams params) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/exec/" + params.execId() + "/json")) {
@@ -791,32 +628,22 @@ public class DockerConnector {
     }
 
     /**
+     * @deprecated use {@link #top(TopParams)} instead
+     */
+    @Deprecated
+    public ContainerProcesses top(String container, String... psArgs) throws IOException {
+        return top(TopParams.from(container)
+                              .withPsArgs(psArgs));
+    }
+
+    /**
      * List processes running inside the container.
      *
-     * @param params
-     *         parameters holder
      * @return processes running inside the container
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public ContainerProcesses top(final TopParams params) throws IOException {
-        return doTop(params, dockerDaemonUri);
-    }
-
-    @Deprecated
-    public ContainerProcesses top(String container, String... psArgs) throws IOException {
-        return doTop(TopParams.from(container)
-                              .withPsArgs(psArgs),
-                     dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #top(TopParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected ContainerProcesses doTop(final TopParams params, final URI dockerDaemonUri) throws IOException {
         final String[] psArgs = params.psArgs();
 
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
@@ -854,20 +681,6 @@ public class DockerConnector {
     /**
      * Gets files from the specified container.
      *
-     * @param params
-     *         parameters holder
-     * @return stream of resources from the specified container filesystem, with retention connection
-     * @throws IOException
-     *         when problems occurs with docker api calls
-     * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8.0 version
-     */
-    public InputStream getResource(final GetResourceParams params) throws IOException {
-        return doGetResource(params, dockerDaemonUri);
-    }
-
-    /**
-     * Gets files from the specified container.
-     *
      * @param container
      *         container id
      * @param sourcePath
@@ -876,19 +689,22 @@ public class DockerConnector {
      * @throws IOException
      *         when problems occurs with docker api calls
      * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8.0 version
+     * @deprecated use {@link #getResource(GetResourceParams)} instead
      */
     @Deprecated
     public InputStream getResource(String container, String sourcePath) throws IOException {
-       return doGetResource(GetResourceParams.from(container, sourcePath), dockerDaemonUri);
+       return getResource(GetResourceParams.from(container, sourcePath));
     }
 
     /**
-     * The same as {@link #getResource(GetResourceParams)} but with additional parameter
+     * Gets files from the specified container.
      *
-     * @param dockerDaemonUri
-     *         docker service URI
+     * @return stream of resources from the specified container filesystem, with retention connection
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8.0 version
      */
-    protected InputStream doGetResource(final GetResourceParams params, final URI dockerDaemonUri) throws IOException {
+    public InputStream getResource(final GetResourceParams params) throws IOException {
         DockerConnection connection = null;
         try {
             connection = connectionFactory.openConnection(dockerDaemonUri)
@@ -911,19 +727,6 @@ public class DockerConnector {
     /**
      * Puts files into specified container.
      *
-     * @param params
-     *         parameters holder
-     * @throws IOException
-     *         when problems occurs with docker api calls, or during file system operations
-     * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8 version
-     */
-    public void putResource(final PutResourceParams params) throws IOException {
-        doPutResource(params, dockerDaemonUri);
-    }
-
-    /**
-     * Puts files into specified container.
-     *
      * @param container
      *         container id
      * @param targetPath
@@ -936,25 +739,26 @@ public class DockerConnector {
      * @throws IOException
      *         when problems occurs with docker api calls, or during file system operations
      * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8 version
+     * @deprecated use {@link #putResource(PutResourceParams)} instead
      */
     @Deprecated
     public void putResource(String container,
                             String targetPath,
                             InputStream sourceStream,
                             boolean noOverwriteDirNonDir) throws IOException {
-       doPutResource(PutResourceParams.from(container, targetPath)
-                                      .withSourceStream(sourceStream)
-                                      .withNoOverwriteDirNonDir(noOverwriteDirNonDir),
-                     dockerDaemonUri);
+       putResource(PutResourceParams.from(container, targetPath)
+                                    .withSourceStream(sourceStream)
+                                    .withNoOverwriteDirNonDir(noOverwriteDirNonDir));
     }
 
     /**
-     * The same as {@link #putResource(PutResourceParams)} but with additional parameter
+     * Puts files into specified container.
      *
-     * @param dockerDaemonUri
-     *         docker service URI
+     * @throws IOException
+     *         when problems occurs with docker api calls, or during file system operations
+     * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8 version
      */
-    protected void doPutResource(final PutResourceParams params, final URI dockerDaemonUri) throws IOException {
+    public void putResource(final PutResourceParams params) throws IOException {
         File tarFile;
         long length;
         try (InputStream sourceData = params.sourceStream()) {
@@ -1003,18 +807,18 @@ public class DockerConnector {
      * @param messageProcessor
      *         processor of all found events that satisfy specified parameters
      * @throws IOException
+     * @deprecated use {@link #getEvents(GetEventsParams, MessageProcessor)} instead
      */
     @Deprecated
     public void getEvents(long sinceSecond,
                           long untilSecond,
                           Filters filters,
                           MessageProcessor<Event> messageProcessor) throws IOException {
-        doGetEvents(GetEventsParams.create()
-                                   .withSinceSecond(sinceSecond)
-                                   .withUntilSecond(untilSecond)
-                                   .withFilters(filters),
-                    messageProcessor,
-                    dockerDaemonUri);
+        getEvents(GetEventsParams.create()
+                                 .withSinceSecond(sinceSecond)
+                                 .withUntilSecond(untilSecond)
+                                 .withFilters(filters),
+                  messageProcessor);
     }
 
     /**
@@ -1027,26 +831,12 @@ public class DockerConnector {
      * If {@code sinceSecond} is 0 no old events will be got.<br>
      * With some connection implementations method can fail due to connection timeout in streaming mode.
      *
-     * @param params
-     *         parameters holder
      * @param messageProcessor
      *         processor of all found events that satisfy specified parameters
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public void getEvents(final GetEventsParams params, MessageProcessor<Event> messageProcessor) throws IOException {
-        doGetEvents(params, messageProcessor, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #getEvents(GetEventsParams, MessageProcessor)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected void doGetEvents(final GetEventsParams params,
-                               final MessageProcessor<Event> messageProcessor,
-                               final URI dockerDaemonUri) throws IOException {
         final Filters filters = params.filters();
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
@@ -1070,10 +860,8 @@ public class DockerConnector {
     }
 
     /**
-     * Builds new docker image from specified dockerfile.
+     * Builds new image.
      *
-     * @param params
-     *         parameters holder
      * @param progressMonitor
      *         ProgressMonitor for images creation process
      * @return image id
@@ -1086,7 +874,7 @@ public class DockerConnector {
     }
 
     /**
-     * The same as {@link #buildImage(BuildImageParams, ProgressMonitor)} but with additional parameter
+     * The same as {@link #buildImage(BuildImageParams, ProgressMonitor)} but with docker service uri parameter
      *
      * @param dockerDaemonUri
      *         docker service URI
@@ -1175,32 +963,22 @@ public class DockerConnector {
         }
     }
 
+    /**
+     * @deprecated use {@link #removeImage(RemoveImageParams)} instead
+     */
     @Deprecated
     public void removeImage(String image, boolean force) throws IOException {
-        doRemoveImage(RemoveImageParams.from(image)
-                                       .withForce(force),
-                      dockerDaemonUri);
+        removeImage(RemoveImageParams.from(image)
+                                     .withForce(force));
     }
 
     /**
      * Removes docker image.
      *
-     * @param params
-     *         parameters holder
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public void removeImage(final RemoveImageParams params) throws IOException {
-        doRemoveImage(params, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #removeImage(RemoveImageParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected void doRemoveImage(final RemoveImageParams params, final URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("DELETE")
                                                             .path("/images/" + params.image())) {
@@ -1213,33 +991,23 @@ public class DockerConnector {
         }
     }
 
+    /**
+     * @deprecated use {@link #tag(TagParams)} nstead
+     */
     @Deprecated
     public void tag(String image, String repository, String tag) throws IOException {
-       doTag(TagParams.from(image, repository)
-                      .withTag(tag)
-                      .withForce(false),
-             dockerDaemonUri);
+       tag(TagParams.from(image, repository)
+                    .withTag(tag)
+                    .withForce(false));
     }
 
     /**
      * Tag the docker image into a repository.
      *
-     * @param params
-     *         parameters holder
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public void tag(final TagParams params) throws IOException {
-        doTag(params, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #tag(TagParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected void doTag(final TagParams params, final URI dockerDaemonUri) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(3);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
@@ -1275,24 +1043,22 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      * @throws InterruptedException
      *         if push process was interrupted
+     * @deprecated use {@link #push(PushParams, ProgressMonitor)} instead
      */
     @Deprecated
     public String push(String repository,
                        String tag,
                        String registry,
                        final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        return doPush(PushParams.from(repository)
-                                .withTag(tag)
-                                .withRegistry(registry),
-                      progressMonitor,
-                      dockerDaemonUri);
+        return push(PushParams.from(repository)
+                              .withTag(tag)
+                              .withRegistry(registry),
+                    progressMonitor);
     }
 
     /**
      * Push docker image to the registry.
      *
-     * @param params
-     *         parameters holder
      * @param progressMonitor
      *         ProgressMonitor for images pushing process
      * @return digest of just pushed image
@@ -1302,18 +1068,6 @@ public class DockerConnector {
      *         if push process was interrupted
      */
     public String push(final PushParams params, final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        return doPush(params,  progressMonitor, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #push(PushParams, ProgressMonitor)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected String doPush(final PushParams params,
-                            final ProgressMonitor progressMonitor,
-                            final URI dockerDaemonUri) throws IOException, InterruptedException {
         final String repository = params.repository();
         final String tag = params.tag();
         final String registry = params.registry();
@@ -1398,37 +1152,27 @@ public class DockerConnector {
         return digestHolder.get();
     }
 
+    /**
+     * @deprecated use {@link #commit(CommitParams)} instead
+     */
     @Deprecated
     public String commit(String container, String repository, String tag, String comment, String author) throws IOException {
         // todo: pause container
-        return doCommit(CommitParams.from(container, repository)
-                                    .withTag(tag)
-                                    .withComment(comment)
-                                    .withAuthor(author),
-                        dockerDaemonUri);
+        return commit(CommitParams.from(container, repository)
+                                  .withTag(tag)
+                                  .withComment(comment)
+                                  .withAuthor(author));
     }
 
     /**
      * Creates a new image from a container’s changes.
      *
-     * @param params
-     *         parameters holder
      * @return id of a new image
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public String commit(final CommitParams params) throws IOException {
         // TODO: pause container
-        return doCommit(params, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #commit(CommitParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected String doCommit(final CommitParams params, final URI dockerDaemonUri) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
@@ -1458,6 +1202,7 @@ public class DockerConnector {
      *
      * @throws IOException
      * @throws InterruptedException
+     * @deprecated use {@link #pull(PullParams, ProgressMonitor)} instead
      */
     @Deprecated
     public void pull(String image,
@@ -1472,10 +1217,8 @@ public class DockerConnector {
     }
 
     /**
-     * Pulls docker image from private registry.
+     * Pulls docker image from registry.
      *
-     * @param params
-     *         parameters holder
      * @param progressMonitor
      *         ProgressMonitor for images creation process
      * @throws IOException
@@ -1492,8 +1235,6 @@ public class DockerConnector {
      * image</a>.
      * To pull from private registry use registry.address:port/image as image. This is not documented.
      *
-     * @param params
-     *         parameters holder
      * @param progressMonitor
      *         ProgressMonitor for images creation process
      * @param dockerDaemonUri
@@ -1562,6 +1303,9 @@ public class DockerConnector {
         }
     }
 
+    /**
+     * @deprecated use {@link #createContainer(CreateContainerParams)} instead
+     */
     @Deprecated
     public ContainerCreated createContainer(ContainerConfig containerConfig, String containerName) throws IOException {
         return doCreateContainer(CreateContainerParams.from(containerConfig)
@@ -1572,8 +1316,6 @@ public class DockerConnector {
     /**
      * Creates docker container.
      *
-     * @param params
-     *         parameters holder
      * @return information about just created container
      * @throws IOException
      *         when problems occurs with docker api calls
@@ -1583,7 +1325,7 @@ public class DockerConnector {
     }
 
     /**
-     * The same as {@link #createContainer(CreateContainerParams)} but with additional parameter
+     * The same as {@link #createContainer(CreateContainerParams)} but with docker service uri parameter
      *
      * @param dockerDaemonUri
      *         docker service URI
@@ -1611,6 +1353,9 @@ public class DockerConnector {
         }
     }
 
+    /**
+     * @deprecated use {@link #stopContainer(StopContainerParams)} instead
+     */
     @Deprecated
     public void startContainer(String container, HostConfig hostConfig) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
@@ -1641,22 +1386,10 @@ public class DockerConnector {
     /**
      * Starts docker container.
      *
-     * @param params
-     *         parameters holder
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public void startContainer(final StartContainerParams params) throws IOException {
-        doStartContainer(params, dockerDaemonUri);
-    }
-
-    /**
-     * The same as {@link #startContainer(StartContainerParams)} but with additional parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     */
-    protected void doStartContainer(final StartContainerParams params, final URI dockerDaemonUri) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
 

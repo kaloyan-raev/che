@@ -95,6 +95,7 @@ public class BuildImageParams {
 
     /**
      * Sets list of files for creation docker image.
+     * One of them must be Dockerfile.
      *
      * @param files
      *         files that are needed for creation docker images (e.g. file of directories used in ADD instruction in Dockerfile).
