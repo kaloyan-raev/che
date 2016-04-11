@@ -442,7 +442,6 @@ export class CheProject {
       delete(newProjectDetails.workspaceId);
     }
     let agent = this.getWorkspaceAgent(workspaceId);
-  alert('update project' + agent);
     let promiseUpdateProjectDetails = this.remoteProjectsAPI.update({
       agent: agent,
       workspaceId: workspaceId,
@@ -452,7 +451,6 @@ export class CheProject {
 
     // update list of projects
     let promiseUpdateProjects = promiseUpdateProjectDetails.then(() => {
-        alert('success');
       this.fetchProjectsForWorkspaceId(workspaceId);
     });
 

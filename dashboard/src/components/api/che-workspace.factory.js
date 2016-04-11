@@ -68,7 +68,7 @@ export class CheWorkspace {
         return link.rel === 'wsagent';
       });
     }
-    return wsAgentLink ? wsAgentLink.href.replace('ws://', '') : '';
+    return wsAgentLink ? wsAgentLink.href.replace('http://', '') : '';
   }
 
   /**
