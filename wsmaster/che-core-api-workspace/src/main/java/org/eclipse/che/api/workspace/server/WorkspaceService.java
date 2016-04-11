@@ -79,6 +79,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
@@ -147,6 +148,11 @@ public class WorkspaceService extends Service {
                                                           @ExampleProperty("attrName:value-with:colon")}))
                            @QueryParam("attribute")
                            List<String> attrsList,
+                           @ApiParam("If true then the workspace will be immediately " +
+                                     "started after it is successfully created")
+                           @QueryParam("start-after-create")
+                           @DefaultValue("false")
+                           Boolean startAfterCreate,
                            @ApiParam("The account id related to this operation")
                            @QueryParam("account")
                            String accountId) throws ConflictException,
@@ -158,11 +164,15 @@ public class WorkspaceService extends Service {
         final Map<String, String> attributes = parseAttrs(attrsList);
         validator.validateAttributes(attributes);
         validator.validateConfig(config);
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(config,
+                                                                         getCurrentUserId(),
+                                                                         attributes,
+                                                                         accountId);
+        if (startAfterCreate) {
+            workspaceManager.startWorkspace(workspace.getId(), null, accountId);
+        }
         return Response.status(201)
-                       .entity(injectLinks(asDto(workspaceManager.createWorkspace(config,
-                                                                                  getCurrentUserId(),
-                                                                                  attributes,
-                                                                                  accountId))))
+                       .entity(injectLinks(asDto(workspace)))
                        .build();
     }
 
@@ -283,6 +293,11 @@ public class WorkspaceService extends Service {
                                   @ApiParam("The name of the workspace environment that should be used for start")
                                   @QueryParam("environment")
                                   String envName,
+                                  @ApiParam("Whether the workspace should be recovered " +
+                                            "from the snapshot if the snapshot exists")
+                                  @QueryParam("auto-restore")
+                                  @DefaultValue("false")
+                                  Boolean autoRestore,
                                   @ApiParam("The account id related to this operation")
                                   @QueryParam("accountId")
                                   String accountId) throws ServerException,
@@ -294,7 +309,13 @@ public class WorkspaceService extends Service {
         params.put("accountId", accountId);
         params.put("workspaceId", workspaceId);
 
-        return injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, accountId)));
+        final WorkspaceImpl workspace;
+        if (autoRestore && snapshotExists(workspaceId)) {
+            workspace = workspaceManager.recoverWorkspace(workspaceId, envName, accountId);
+        } else {
+            workspace = workspaceManager.startWorkspace(workspaceId, envName, accountId);
+        }
+        return injectLinks(asDto(workspace));
     }
 
     @POST
@@ -377,12 +398,17 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public void stop(@ApiParam("The workspace id") @PathParam("id") String id) throws ForbiddenException,
-                                                                                      NotFoundException,
-                                                                                      ServerException,
-                                                                                      ConflictException,
-                                                                                      BadRequestException {
-        workspaceManager.stopWorkspace(id);
+    public void stop(@ApiParam("The workspace id")
+                     @PathParam("id")
+                     String id,
+                     @ApiParam("Whether workspace snapshot should be created before stop")
+                     @QueryParam("auto-snapshot")
+                     @DefaultValue("false")
+                     Boolean autoSnapshot) throws ForbiddenException,
+                                                  NotFoundException,
+                                                  ServerException,
+                                                  ConflictException {
+        workspaceManager.stopWorkspace(id, autoSnapshot);
     }
 
     @POST
@@ -399,7 +425,8 @@ public class WorkspaceService extends Service {
     public void createSnapshot(@ApiParam("The workspace id") @PathParam("id") String workspaceId) throws BadRequestException,
                                                                                                          ForbiddenException,
                                                                                                          NotFoundException,
-                                                                                                         ServerException {
+                                                                                                         ServerException,
+                                                                                                         ConflictException {
         workspaceManager.createSnapshot(workspaceId);
     }
 
@@ -741,7 +768,7 @@ public class WorkspaceService extends Service {
                        .build();
     }
 
-    protected WorkspaceDto injectLinks(WorkspaceDto workspace) {
+    private WorkspaceDto injectLinks(WorkspaceDto workspace) {
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         final List<Link> links = new ArrayList<>();
         // add common workspace links
@@ -831,13 +858,21 @@ public class WorkspaceService extends Service {
                          .stream()
                          .filter(server -> WSAGENT_REFERENCE.equals(server.getRef()))
                          .findAny()
-                         .ifPresent(wsAgent -> links.add(createLink("GET",
-                                                                    UriBuilder.fromUri(wsAgent.getUrl())
-                                                                              .scheme("https".equals(ideUri.getScheme()) ? "wss"
-                                                                                                                         : "ws")
-                                                                              .build()
-                                                                              .toString(),
-                                                                    WSAGENT_REFERENCE)));
+                         .ifPresent(wsAgent -> {
+                             workspace.getRuntime()
+                                      .getLinks()
+                                      .add(createLink("GET",
+                                                      wsAgent.getUrl(),
+                                                      WSAGENT_REFERENCE));
+                             workspace.getRuntime()
+                                      .getLinks()
+                                      .add(createLink("GET",
+                                                      UriBuilder.fromUri(wsAgent.getUrl())
+                                                                .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+                                                                .build()
+                                                                .toString(),
+                                                      WSAGENT_WEBSOCKET_REFERENCE));
+                         });
             }
         }
         return workspace.withLinks(links);
@@ -881,6 +916,15 @@ public class WorkspaceService extends Service {
                                                       APPLICATION_JSON,
                                                       LINK_REL_SELF);
         return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
+    }
+
+    private boolean snapshotExists(String workspaceId) throws ServerException {
+        try {
+            workspaceManager.getSnapshot(workspaceId);
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
     }
 
     private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {

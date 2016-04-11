@@ -17,6 +17,7 @@ package org.eclipse.che.api.workspace.shared;
  */
 public final class Constants {
 
+    public static final String WORKSPACE_STOPPED_BY           = "stopped_by";
     public static final String LINK_REL_GET_WORKSPACES        = "get workspaces";
     public static final String LINK_REL_CREATE_WORKSPACE      = "create workspace";
     public static final String LINK_REL_REMOVE_WORKSPACE      = "remove workspace";

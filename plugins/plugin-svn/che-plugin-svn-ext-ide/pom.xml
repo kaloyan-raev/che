@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-svn-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.1.0-RC1-SNAPSHOT</version>
+        <version>4.2.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-svn-ext-ide</artifactId>
     <packaging>jar</packaging>
@@ -77,6 +77,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-machine-ext-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

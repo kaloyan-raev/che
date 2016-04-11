@@ -12,24 +12,24 @@ package org.eclipse.che.plugin.svn.ide.resolve;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -45,9 +45,8 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
     private List<String> conflictsPaths;
 
     @Inject
-    protected ResolvePresenter(final EventBus eventBus,
-                               final WorkspaceAgent workspaceAgent,
-                               final SubversionOutputConsolePresenter console,
+    protected ResolvePresenter(final ConsolesPanelPresenter consolesPanelPresenter,
+                               final SubversionOutputConsoleFactory consoleFactory,
                                final AppContext appContext,
                                final SubversionExtensionLocalizationConstants constants,
                                final NotificationManager notificationManager,
@@ -55,7 +54,7 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
                                final SubversionClientService subversionClientService,
                                final ResolveView view,
                                final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.subversionClientService = subversionClientService;
         this.notificationManager = notificationManager;
@@ -66,7 +65,11 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
         this.view.setDelegate(this);
     }
 
-    public void fetchConflictsList(boolean forCurrentSelection, final AsyncCallback<List<String>> callback) {
+    public boolean containsConflicts() {
+        return conflictsPaths != null && !conflictsPaths.isEmpty();
+    }
+
+    public void fetchConflictsList(boolean forCurrentSelection) {
         CurrentProject currentProject = getActiveProject();
         if (currentProject == null) {
             return;
@@ -82,7 +85,7 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
                                               new AsyncCallback<List<String>>() {
                                                   @Override
                                                   public void onSuccess(List<String> conflictsList) {
-                                                      callback.onSuccess(conflictsList);
+                                                      conflictsPaths = conflictsList;
                                                   }
 
                                                   @Override
@@ -92,19 +95,17 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
                                               });
     }
 
-    public void showConflictsDialog(List<String> conflictsList) {
-        if (conflictsList.size() > 0) {
-            for (String file : conflictsList) {
+    public void showConflictsDialog() {
+        if (conflictsPaths != null && !conflictsPaths.isEmpty()) {
+            for (String file : conflictsPaths) {
                 view.addConflictingFile(file);
             }
-            conflictsPaths = conflictsList;
             view.showDialog();
         } else {
             dialogFactory.createMessageDialog(constants.resolveNoConflictTitle(), constants.resolveNoConflictContent(),
                                               new ConfirmCallback() {
                                                   @Override
-                                                  public void accepted() {
-                                                  }
+                                                  public void accepted() {}
                                               }).show();
         }
     }
@@ -112,7 +113,6 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
     @Override
     public void onCancelClicked() {
         view.close();
-        conflictsPaths.clear();
     }
 
     @Override
@@ -128,28 +128,35 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
         }
 
         HashMap<String, String> filesConflictResolutionActions = new HashMap<String, String>();
-        for (String path : conflictsPaths) {
+        Iterator<String> iterConflicts = conflictsPaths.iterator();
+
+        while (iterConflicts.hasNext()) {
+            String path = iterConflicts.next();
             String resolutionActionText = view.getConflictResolutionAction(path);
-            filesConflictResolutionActions.put(path, resolutionActionText);
+            if (!resolutionActionText.equals(ConflictResolutionAction.POSTPONE.getText())) {
+                filesConflictResolutionActions.put(path, resolutionActionText);
+                iterConflicts.remove();
+            }
         }
 
-        subversionClientService.resolve(project.getPath(), filesConflictResolutionActions, "infinity",
-                                        new AsyncCallback<CLIOutputResponseList>() {
-                                            @Override
-                                            public void onSuccess(CLIOutputResponseList result) {
-                                                for (CLIOutputResponse outputResponse : result.getCLIOutputResponses()) {
-                                                    printCommand(outputResponse.getCommand());
-                                                    printAndSpace(outputResponse.getOutput());
+        if (filesConflictResolutionActions.size() > 0) {
+            subversionClientService.resolve(project.getPath(), filesConflictResolutionActions, "infinity",
+                                            new AsyncCallback<CLIOutputResponseList>() {
+                                                @Override
+                                                public void onSuccess(CLIOutputResponseList result) {
+                                                    for (CLIOutputResponse outputResponse : result.getCLIOutputResponses()) {
+                                                        printResponse(outputResponse.getCommand(), outputResponse.getOutput(), null,
+                                                                      constants.commandResolve());
+                                                    }
                                                 }
-                                            }
 
-                                            @Override
-                                            public void onFailure(Throwable exception) {
-                                                notificationManager.notify(exception.getMessage(), FAIL, true);
-                                            }
-                                        });
+                                                @Override
+                                                public void onFailure(Throwable exception) {
+                                                    notificationManager.notify(exception.getMessage(), FAIL, true);
+                                                }
+                                            });
+        }
         view.close();
-        conflictsPaths.clear();
     }
 
 }

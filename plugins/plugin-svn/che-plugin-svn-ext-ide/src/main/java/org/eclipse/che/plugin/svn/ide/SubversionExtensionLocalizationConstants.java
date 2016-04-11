@@ -19,6 +19,64 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface SubversionExtensionLocalizationConstants extends Messages {
 
+    @Key("svn.console.project.name")
+    String consoleProjectName(String projectName);
+
+    /** Commands Constants */
+    @Key("command.add")
+    String commandAdd();
+
+    @Key("command.cleanup")
+    String commandCleanup();
+
+    @Key("command.commit")
+    String commandCommit();
+
+    @Key("command.copy")
+    String commandCopy();
+
+    @Key("command.diff")
+    String commandDiff();
+
+    @Key("command.export")
+    String commandExport();
+
+    @Key("command.info")
+    String commandInfo();
+
+    @Key("command.lock")
+    String commandLock();
+
+    @Key("command.unlock")
+    String commandUnlock();
+
+    @Key("command.log")
+    String commandLog();
+
+    @Key("command.merge")
+    String commandMerge();
+
+    @Key("command.move")
+    String commandMove();
+
+    @Key("command.property")
+    String commandProperty();
+
+    @Key("command.remove")
+    String commandRemove();
+
+    @Key("command.resolve")
+    String commandResolve();
+
+    @Key("command.revert")
+    String commandRevert();
+
+    @Key("command.status")
+    String commandStatus();
+
+    @Key("command.update")
+    String commandUpdate();
+
     /** Action Constants */
     @Key("action.not.implemented")
     String actionNotImplemented();
@@ -340,14 +398,11 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("importer.projectDescriptionPrompt")
     String importerProjectDescriptionPrompt();
 
-    @Key("importer.projectPrivacy")
-    String importerProjectPrivacy();
+    @Key("importer.default.relativePath")
+    String importerDefaultRelativePath();
 
-    @Key("importer.projectVisibilityPublic")
-    String importerProjectVisibilityPublic();
-
-    @Key("importer.projectVisibilityPrivate")
-    String importerProjectVisibilityPrivate();
+    @Key("importer.url.incorrect.message")
+    String importProjectUrlIncorrectMessage();
 
     @Key("status.successful")
     String statusSuccessful();
@@ -474,6 +529,18 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("export.successful")
     String exportSuccessful(String path);
 
+    @Key("export.fail.noprojectpath")
+    String exportFailedNoProjectPath();
+
+    @Key("export.fail.command.execution")
+    String exportCommandExecutionError();
+
+    @Key("export.fail.revision.donotexist")
+    String exportRevisionDoNotExistForPath(String givenRevision, String path);
+
+    @Key("export.fail.norevision")
+    String exportNoRevisionForPath(String path);
+
     /* Move dialog */
     @Key("move.fail.to.get.project")
     String moveFailToGetProject();
@@ -535,4 +602,7 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
 
     @Key("button.console.clear")
     String consoleClearButton();
+
+    @Key("button.console.scroll")
+    String consoleScrollButton();
 }
