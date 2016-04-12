@@ -23,15 +23,15 @@ import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +132,11 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
                          .filter(ws -> ws.getNamespace().equals(namespace))
                          .map(WorkspaceImpl::new)
                          .collect(toList());
+    }
+
+    @Override
+    public List<WorkspaceImpl> getWorkspaces(String username) throws ServerException {
+        return new ArrayList<>(workspaces.values());
     }
 
     private Optional<WorkspaceImpl> find(String name, String owner) {

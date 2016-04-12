@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.jayway.restassured.response.Response;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -358,7 +357,6 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(permissionManager).checkPermission(eq(Constants.START_WORKSPACE), any(), any());
         verify(wsManager).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
         verify(wsManager, never()).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
     }

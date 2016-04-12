@@ -28,6 +28,8 @@ import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
+import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
+import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -307,6 +309,7 @@ public class WorkspaceManager {
         }
         workspaceDao.remove(workspaceId);
         hooks.afterRemove(workspaceId);
+        eventService.publish(new WorkspaceRemovedEvent(workspaceId));
         LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOr("undefined"));
     }
 
@@ -684,6 +687,7 @@ public class WorkspaceManager {
         hooks.beforeCreate(workspace, accountId);
         workspaceDao.create(workspace);
         hooks.afterCreate(workspace, accountId);
+        eventService.publish(new WorkspaceCreatedEvent(workspace));
         LOG.info("Workspace '{}:{}' created by user '{}'",
                  namespace,
                  workspace.getConfig().getName(),
