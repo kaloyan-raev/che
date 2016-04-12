@@ -71,6 +71,10 @@ public abstract class DockerConnection implements Closeable {
         return this;
     }
 
+    /**
+     * @deprecated use {@link #entity(byte[])} instead
+     */
+    @Deprecated
     public DockerConnection entity(String entity) {
         this.entity = new StringEntity(entity);
         return this;
