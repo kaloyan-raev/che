@@ -18,7 +18,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -31,7 +31,7 @@ public abstract class DockerConnection implements Closeable {
     private String    path;
     private Entity<?> entity;
     private StringBuilder         query   = new StringBuilder();
-    private List<Pair<String, ?>> headers = Collections.emptyList();
+    private List<Pair<String, ?>> headers = new LinkedList<>();
 
     public DockerConnection method(String method) {
         this.method = method;
