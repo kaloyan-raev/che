@@ -25,12 +25,6 @@ public interface ProjectPropertiesResources extends ClientBundle {
 
         String categoryHeader();
 
-        String categorySubElementHeader();
-
-        String hintLabel();
-
-        String buttonArea();
-
         String opacityButton();
 
         String selectNode();

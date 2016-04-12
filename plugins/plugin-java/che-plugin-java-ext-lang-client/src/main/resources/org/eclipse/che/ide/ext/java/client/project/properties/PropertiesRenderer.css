@@ -12,12 +12,6 @@
 @eval categoryHeaderButtonColor org.eclipse.che.ide.api.theme.Style.theme.categoryHeaderButtonColor();
 @eval nodeSelectedColor org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBackground();
 
-.hintLabel {
-    color: textFieldColor;
-    font-size: largeLabel;
-    font-weight: bold;
-}
-
 .categoryHeader svg {
     width: 15px;
     height: 15px;
@@ -41,8 +35,7 @@
     stroke: blueIconColor;
 }
 
-.categoryHeader span:last-child,
-.buttonArea > span {
+.categoryHeader span:last-child {
     display: inline-block;
     height: 100%;
     width: 25px;
@@ -51,25 +44,13 @@
     text-align: center;
 }
 
-.categoryHeader span:last-child svg,
-.buttonArea svg {
+.categoryHeader span:last-child svg {
     width: 14px;
     height: 14px;
     margin-top: -2px;
     vertical-align: middle;
     fill: categoryHeaderButtonColor;
     stroke: categoryHeaderButtonColor;
-}
-
-.categoryHeader span:last-child:hover svg,
-.buttonArea span:hover > svg {
-    fill: categoryHeaderButtonHoverColor;
-    stroke: categoryHeaderButtonHoverColor;
-}
-
-.buttonArea {
-    display: none;
-    float: right;
 }
 
 .opacityButton {
