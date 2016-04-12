@@ -350,4 +350,25 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("unable.to.load.java.compiler.errors.warnings.settings")
     String unableToLoadJavaCompilerErrorsWarningsSettings();
+
+    @Key("project.properties.action.description")
+    String projectPropertiesDescriptions();
+
+    @Key("project.properties.action.title")
+    String projectPropertiesTitle();
+
+    @Key("libraries.property.name")
+    String librariesPropertyName();
+
+    @Key("java.build.path.category")
+    String javaBuildPathCategory();
+
+    @Key("library.title")
+    String libraryTitle();
+
+    @Key("remove.element.button")
+    String removeElementButton();
+
+    @Key("add.jar.button")
+    String addJarButton();
 }

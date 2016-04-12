@@ -31,6 +31,7 @@ import org.eclipse.che.ide.ext.java.client.action.NewPackageAction;
 import org.eclipse.che.ide.ext.java.client.action.OpenDeclarationAction;
 import org.eclipse.che.ide.ext.java.client.action.OpenImplementationAction;
 import org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction;
+import org.eclipse.che.ide.ext.java.client.action.ProjectPropertiesAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickDocumentationAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.CutJavaSourceAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.MoveAction;
@@ -41,6 +42,7 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 
 /** @author Evgen Vidolob */
 @Extension(title = "Java", version = "3.0.0")
@@ -70,6 +72,7 @@ public class JavaExtension {
                                 KeyBindingAgent keyBinding,
                                 NewJavaSourceFileAction newJavaSourceFileAction,
                                 ActionManager actionManager,
+                                ProjectPropertiesAction projectPropertiesAction,
                                 MoveAction moveAction,
                                 CutJavaSourceAction cutAction,
                                 FileStructureAction fileStructureAction,
@@ -93,6 +96,10 @@ public class JavaExtension {
             refactorGroup = new DefaultActionGroup("Refactoring", true, actionManager);
             actionManager.registerAction(GROUP_ASSISTANT_REFACTORING, refactorGroup);
         }
+
+        DefaultActionGroup projectGroup = (DefaultActionGroup)actionManager.getAction(GROUP_PROJECT);
+        actionManager.registerAction("projectProperties", projectPropertiesAction);
+        projectGroup.add(projectPropertiesAction, new Constraints(Anchor.LAST, null));
 
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
         refactorGroup.addSeparator();
