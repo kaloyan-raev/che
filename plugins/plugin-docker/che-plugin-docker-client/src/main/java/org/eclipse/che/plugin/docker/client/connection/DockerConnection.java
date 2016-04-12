@@ -24,6 +24,7 @@ import java.util.List;
 /**
  * @author andrew00x
  * @author Alexander Garagatyi
+ * @author Mykola Morhun
  */
 public abstract class DockerConnection implements Closeable {
     private String    method;
@@ -58,6 +59,11 @@ public abstract class DockerConnection implements Closeable {
             }
             query.append(name).append('=').append(value.toString());
         }
+        return this;
+    }
+
+    public DockerConnection header(Pair<String, ?> pair) {
+        this.headers.add(pair);
         return this;
     }
 

@@ -269,7 +269,7 @@ public class DockerConnector {
     @Deprecated
     public void stopContainer(String container, long timeout, TimeUnit timeunit) throws IOException {
         stopContainer(StopContainerParams.from(container)
-                                           .withTimeout(timeout, timeunit));
+                                         .withTimeout(timeout, timeunit));
     }
 
     /**
@@ -483,7 +483,7 @@ public class DockerConnector {
     @Deprecated
     public Exec createExec(String container, boolean detach, String... cmd) throws IOException {
         return createExec(CreateExecParams.from(container, cmd)
-                                            .withDetach(detach));
+                                          .withDetach(detach));
     }
 
     /**
@@ -495,19 +495,17 @@ public class DockerConnector {
      */
     public Exec createExec(final CreateExecParams params) throws IOException {
         final ExecConfig execConfig = new ExecConfig().withCmd(params.cmd());
-        if (!params.detach()) {
+        if (params.detach() != null && !params.detach()) {
             execConfig.withAttachStderr(true).withAttachStdout(true);
         }
-        final List<Pair<String, ?>> headers = new ArrayList<>(2);
         final String entity = JsonHelper.toJson(execConfig, FIRST_LETTER_LOWERCASE);
         byte[] entityBytesArray = entity.getBytes();
-        headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
-        headers.add(Pair.of("Content-Length", entityBytesArray.length));
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/containers/" + params.container() + "/exec")
-                                                            .headers(headers)
+                                                            .header(Pair.of("Content-Type", MediaType.APPLICATION_JSON))
+                                                            .header(Pair.of("Content-Length", entityBytesArray.length))
                                                             .entity(entityBytesArray)) {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
@@ -537,26 +535,21 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public void startExec(final StartExecParams params, MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
-        final Boolean detach = params.detach();
-        final Boolean tty = params.tty();
-
         final ExecStart execStart = new ExecStart().withDetach(execOutputProcessor == null);
-        if (detach != null) {
-            execStart.withDetach(detach);
+        if (params.detach() != null) {
+            execStart.withDetach(params.detach());
         }
-        if (tty != null) {
-            execStart.withTty(tty);
+        if (params.tty() != null) {
+            execStart.withTty(params.tty());
         }
+
         final String entity = JsonHelper.toJson(execStart, FIRST_LETTER_LOWERCASE);
         byte[] entityBytesArray = entity.getBytes();
-        final List<Pair<String, ?>> headers = new ArrayList<>(2);
-        headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
-        headers.add(Pair.of("Content-Length", entityBytesArray.length));
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/exec/" + params.execId() + "/start")
-                                                            .headers(headers)
+                                                            .header(Pair.of("Content-Type", MediaType.APPLICATION_JSON))
+                                                            .header(Pair.of("Content-Length", entityBytesArray.length))
                                                             .entity(entityBytesArray)) {
 
             final DockerResponse response = connection.request();
@@ -614,7 +607,7 @@ public class DockerConnector {
     @Deprecated
     public ContainerProcesses top(String container, String... psArgs) throws IOException {
         return top(TopParams.from(container)
-                              .withPsArgs(psArgs));
+                            .withPsArgs(psArgs));
     }
 
     /**
@@ -738,14 +731,13 @@ public class DockerConnector {
             length = Files.copy(sourceData, tarFilePath, StandardCopyOption.REPLACE_EXISTING);
         }
 
-        List<Pair<String, ?>> headers = Arrays.asList(Pair.of("Content-Type", ExtMediaType.APPLICATION_X_TAR),
-                                                      Pair.of("Content-Length", length));
         try (InputStream tarStream = new BufferedInputStream(new FileInputStream(tarFile));
              DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("PUT")
                                                             .path("/containers/" + params.container() + "/archive")
                                                             .query("path", params.targetPath())
-                                                            .headers(headers)
+                                                            .header(Pair.of("Content-Type", ExtMediaType.APPLICATION_X_TAR))
+                                                            .header(Pair.of("Content-Length", length))
                                                             .entity(tarStream)) {
             addQueryParamIfSet(connection, "noOverwriteDirNonDir", params.noOverwriteDirNonDir());
             final DockerResponse response = connection.request();
@@ -858,12 +850,7 @@ public class DockerConnector {
         final File tar = Files.createTempFile(null, ".tar").toFile();
         try {
             createTarArchive(tar, files);
-
             AuthConfigs authConfigs = firstNonNull(params.authConfigs(), initialAuthConfig.getAuthConfigs());
-            final List<Pair<String, ?>> headers = new ArrayList<>(3);
-            headers.add(Pair.of("Content-Type", "application/x-compressed-tar"));
-            headers.add(Pair.of("Content-Length", tar.length()));
-            headers.add(Pair.of("X-Registry-Config", Base64.encodeBase64String(JsonHelper.toJson(authConfigs).getBytes())));
 
             try (InputStream tarInput = new FileInputStream(tar);
                  DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
@@ -871,7 +858,11 @@ public class DockerConnector {
                                                                 .path("/build")
                                                                 .query("rm", 1)
                                                                 .query("forcerm", 1)
-                                                                .headers(headers)
+                                                                .header(Pair.of("Content-Type", "application/x-compressed-tar"))
+                                                                .header(Pair.of("Content-Length", tar.length()))
+                                                                .header(Pair.of("X-Registry-Config",
+                                                                                Base64.encodeBase64String(JsonHelper.toJson(authConfigs)
+                                                                                                                    .getBytes())))
                                                                 .entity(tarInput)) {
                 addQueryParamIfSet(connection, "t", params.repository());
                 addQueryParamIfSet(connection, "memory", params.memoryLimit());
@@ -1031,20 +1022,15 @@ public class DockerConnector {
      *         if push process was interrupted
      */
     public String push(final PushParams params, final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        final String repository = params.repository();
-        final String tag = params.tag();
-        final String registry = params.registry();
-
-        final List<Pair<String, ?>> headers = new ArrayList<>(2);
-        headers.add(Pair.of("X-Registry-Auth", initialAuthConfig.getAuthConfigHeader()));
-        final String fullRepo = registry != null ? registry + "/" + repository : repository;
+        final String fullRepo = (params.registry() != null) ?
+                                params.registry() + "/" + params.repository() : params.repository();
         final ValueHolder<String> digestHolder = new ValueHolder<>();
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/" + fullRepo + "/push")
-                                                            .headers(headers)) {
-            addQueryParamIfSet(connection, "tag", tag);
+                                                            .header(Pair.of("X-Registry-Auth", initialAuthConfig.getAuthConfigHeader()))) {
+            addQueryParamIfSet(connection, "tag", params.tag());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
@@ -1065,7 +1051,7 @@ public class DockerConnector {
                     @Override
                     public void run() {
                         try {
-                            String digestPrefix = firstNonNull(tag, "latest") + ": digest: ";
+                            String digestPrefix = firstNonNull(params.tag(), "latest") + ": digest: ";
                             ProgressStatus progressStatus;
                             while ((progressStatus = progressReader.next()) != null && exceptionHolder.get() == null) {
                                 progressMonitor.updateProgress(progressStatus);
@@ -1101,7 +1087,7 @@ public class DockerConnector {
                 if (digestHolder.get() == null) {
                     LOG.error("Docker image {}:{} was successfully pushed, but its digest wasn't obtained",
                               fullRepo,
-                              firstNonNull(tag, "latest"));
+                              firstNonNull(params.tag(), "latest"));
                     throw new DockerException("Docker image was successfully pushed, but its digest wasn't obtained", 500);
                 }
                 final IOException ioe = errorHolder.get();
@@ -1208,14 +1194,11 @@ public class DockerConnector {
         final String image = params.image();
         final String registry = params.registry();
 
-        final List<Pair<String, ?>> headers = new ArrayList<>(2);
-        headers.add(Pair.of("X-Registry-Auth", initialAuthConfig.getAuthConfigHeader()));
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/create")
                                                             .query("fromImage", registry != null ? registry + "/" + image : image)
-                                                            .headers(headers)) {
+                                                            .header(Pair.of("X-Registry-Auth", initialAuthConfig.getAuthConfigHeader()))) {
             addQueryParamIfSet(connection, "tag", params.tag());
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
@@ -1287,16 +1270,14 @@ public class DockerConnector {
      *         docker service URI
      */
     protected ContainerCreated doCreateContainer(final CreateContainerParams params, final URI dockerDaemonUri) throws IOException {
-        final List<Pair<String, ?>> headers = new ArrayList<>(2);
-        headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
         final String entity = JsonHelper.toJson(params.containerConfig(), FIRST_LETTER_LOWERCASE);
         byte[] entityBytesArray = entity.getBytes();
-        headers.add(Pair.of("Content-Length", entityBytesArray.length));
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/containers/create")
-                                                            .headers(headers)
+                                                            .header(Pair.of("Content-Type", MediaType.APPLICATION_JSON))
+                                                            .header(Pair.of("Content-Length", entityBytesArray.length))
                                                             .entity(entityBytesArray)) {
             addQueryParamIfSet(connection, "name", params.containerName());
             final DockerResponse response = connection.request();
