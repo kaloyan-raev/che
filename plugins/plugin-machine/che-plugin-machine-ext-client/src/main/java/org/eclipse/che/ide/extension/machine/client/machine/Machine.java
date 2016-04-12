@@ -15,10 +15,12 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.Server;
@@ -39,14 +41,18 @@ public class Machine {
 
     private final MachineDto    descriptor;
     private final EntityFactory entityFactory;
+    private final AppContext    appContext;
 
     private String activeTabName;
 
     @Inject
-    public Machine(MachineLocalizationConstant locale, EntityFactory entityFactory, @Assisted MachineDto descriptor) {
+    public Machine(MachineLocalizationConstant locale,
+                   EntityFactory entityFactory,
+                   @Assisted MachineDto descriptor,
+                   AppContext appContext) {
         this.entityFactory = entityFactory;
         this.descriptor = descriptor;
-
+        this.appContext = appContext;
         this.activeTabName = locale.tabInfo();
     }
 
@@ -83,22 +89,23 @@ public class Machine {
         return "";
     }
 
-    /** @return special url to connect to terminal web socket. */
+    /** @return special url to connect to ws agent web socket. */
     @NotNull
     public String getWsServerExtensionsUrl() {
-        String url = "";
-        Map<String, ServerDto> serverDescriptors = descriptor.getRuntime().getServers();
-        for (ServerDto descriptor : serverDescriptors.values()) {
-            if (Constants.WSAGENT_REFERENCE.equals(descriptor.getRef())) {
-                url = descriptor.getUrl();
+        final List<Link> links = appContext.getWorkspace()
+                                           .getRuntime()
+                                           .getDevMachine()
+                                           .getLinks();
+
+        for (Link link : links) {
+            if (Constants.WSAGENT_REFERENCE.equals(link.getRel())) {
+                String url = link.getHref();
+                url = url.substring(url.indexOf(':'), url.length());
+                boolean isSecureConnection = Window.Location.getProtocol().equals("https:");
+                return (isSecureConnection ? "wss" : "ws") + url + Config.getCheExtensionPath() + "/ws";
             }
         }
-
-        String extUrl = url.substring(url.indexOf(':'), url.length());
-
-        boolean isSecureConnection = Window.Location.getProtocol().equals("https:");
-
-        return (isSecureConnection ? "wss" : "ws") + extUrl + Config.getCheExtensionPath() + "/ws";
+        return "";
     }
 
     /**
@@ -123,21 +130,21 @@ public class Machine {
         return activeTabName;
     }
 
+    /** @return special url to connect to terminal web socket. */
     public String getTerminalUrl() {
-        Map<String, ServerDto> serverDescriptors = descriptor.getRuntime().getServers();
+        final List<Link> links = appContext.getWorkspace()
+                                           .getRuntime()
+                                           .getDevMachine()
+                                           .getLinks();
 
-        for (ServerDto descriptor : serverDescriptors.values()) {
-            if (Constants.TERMINAL_REFERENCE.equals(descriptor.getRef())) {
-                String terminalUrl = descriptor.getUrl();
-
+        for (Link link : links) {
+            if (Constants.TERMINAL_REFERENCE.equals(link.getRel())) {
+                String terminalUrl = link.getHref();
                 terminalUrl = terminalUrl.substring(terminalUrl.indexOf(':'), terminalUrl.length());
-
                 boolean isSecureConnection = Window.Location.getProtocol().equals("https:");
-
                 return (isSecureConnection ? "wss" : "ws") + terminalUrl + "/pty";
             }
         }
-
         return "";
     }
 

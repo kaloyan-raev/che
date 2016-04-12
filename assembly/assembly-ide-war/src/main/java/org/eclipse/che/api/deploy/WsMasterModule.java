@@ -45,6 +45,7 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker;
+import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalLauncher;
 import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
@@ -128,6 +129,10 @@ public class WsMasterModule extends AbstractModule {
                           "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
 
+        bindConstant().annotatedWith(Names.named(DockerMachineTerminalLauncher.START_TERMINAL_COMMAND))
+                      .to("mkdir -p ~/che " +
+                          "&& cp /mnt/che/terminal -R ~/che" +
+                          "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
 
         bind(WorkspaceValidator.class).to(DefaultWorkspaceValidator.class);
         bind(MachineStateListener.class).asEagerSingleton();

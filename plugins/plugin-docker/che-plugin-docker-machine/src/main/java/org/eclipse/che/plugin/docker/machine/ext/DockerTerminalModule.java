@@ -28,11 +28,6 @@ public class DockerTerminalModule extends AbstractModule {
     protected void configure() {
         bind(DockerMachineTerminalLauncher.class).asEagerSingleton();
 
-        bindConstant().annotatedWith(Names.named(DockerMachineTerminalLauncher.START_TERMINAL_COMMAND))
-                      .to("mkdir -p ~/che " +
-                          "&& cp /mnt/che/terminal -R ~/che" +
-                          "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
-
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.machine_servers"));

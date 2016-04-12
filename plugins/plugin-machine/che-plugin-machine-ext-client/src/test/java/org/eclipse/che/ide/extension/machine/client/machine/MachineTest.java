@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.machine;
 
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.junit.Before;
@@ -22,11 +26,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,6 +58,8 @@ public class MachineTest {
     private MachineLocalizationConstant locale;
     @Mock
     private EntityFactory               entityFactory;
+    @Mock
+    private AppContext                  appContext;
 
     private Machine machine;
 
@@ -59,8 +68,17 @@ public class MachineTest {
         Map<String, ServerDto> servers = new HashMap<>();
         servers.put(SOME_TEXT, serverDescriptor);
 
-        machine = new Machine(locale, entityFactory, descriptor);
+        machine = new Machine(locale, entityFactory, descriptor, appContext);
 
+        final WorkspaceDto ws = mock(WorkspaceDto.class);
+        final WorkspaceRuntimeDto wsRuntime = mock(WorkspaceRuntimeDto.class);
+        final MachineDto machine = mock(MachineDto.class);
+        final List<Link> links = Collections.emptyList();
+
+        when(appContext.getWorkspace()).thenReturn(ws);
+        when(ws.getRuntime()).thenReturn(wsRuntime);
+        when(wsRuntime.getDevMachine()).thenReturn(machine);
+        when(machine.getLinks()).thenReturn(links);
         when(descriptor.getRuntime()).thenReturn(machineRuntimeDto);
         when(descriptor.getConfig()).thenReturn(machineConfig);
         when(serverDescriptor.getAddress()).thenReturn(SOME_TEXT);
@@ -75,7 +93,7 @@ public class MachineTest {
     @Test
     public void defaultActiveTabShouldBeReturned() {
         when(locale.tabInfo()).thenReturn(SOME_TEXT);
-        machine = new Machine(locale, entityFactory, descriptor);
+        machine = new Machine(locale, entityFactory, descriptor, null);
 
         String tabName = machine.getActiveTabName();
 
@@ -120,7 +138,7 @@ public class MachineTest {
     }
 
     @Test
-    public void nullShouldBeReturnedWhenTerminalRefIsNull() {
+    public void emptyUrlShouldBeReturnedWhenTerminalRefIsNull() {
         when(serverDescriptor.getRef()).thenReturn(null);
 
         String url = machine.getTerminalUrl();
