@@ -212,11 +212,20 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("view.targets.save.error")
     String targetsViewSaveError();
 
+    @Key("view.targets.connect.progress")
+    String targetsViewConnectProgress(String target);
+
     @Key("view.targets.connect.success")
     String targetsViewConnectSuccess(String target);
 
     @Key("view.targets.connect.error")
     String targetsViewConnectError(String target);
+
+    @Key("view.targets.disconnect.success")
+    String targetsViewDisconnectSuccess(String target);
+
+    @Key("view.targets.disconnect.error")
+    String targetsViewDisconnectError(String target);
 
     @Key("view.targets.delete.confirm")
     String targetsViewDeleteConfirm(String target);

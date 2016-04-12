@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.targets;
 
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
@@ -26,6 +27,8 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,12 +40,17 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandResources;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 import org.eclipse.che.ide.ui.window.Window;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,10 +101,13 @@ public class TargetsViewImpl extends Window implements TargetsView {
     TextBox                         userName;
 
     @UiField
-    TextBox                         password;
+    PasswordTextBox                 password;
 
     @UiField
     FlowPanel                       operationPanel;
+
+    @UiField
+    Label                           operationLabel;
 
     @UiField
     FlowPanel                       footer;
@@ -172,7 +183,10 @@ public class TargetsViewImpl extends Window implements TargetsView {
             }
         });
         connectButton.addStyleName(this.resources.windowCss().primaryButton());
+        connectButton.addStyleName(resources.Css().buttonLoader());
+
         operationPanel.add(connectButton);
+        operationPanel.getElement().insertFirst(connectButton.getElement());
 
 
         targetName.addKeyUpHandler(new KeyUpHandler() {
@@ -249,6 +263,13 @@ public class TargetsViewImpl extends Window implements TargetsView {
 
     @Override
     public void showTargets(List<Target> targets) {
+        Collections.sort(targets, new Comparator<Target>() {
+            @Override
+            public int compare(Target target1, Target target2) {
+                return target1.getName().compareTo(target2.getName());
+            }
+        });
+
         HashMap<String, List<Target>> categories = new HashMap<>();
         for (Target target : targets) {
             List<Target> categoryTargets = categories.get(target.getType());
@@ -329,14 +350,26 @@ public class TargetsViewImpl extends Window implements TargetsView {
     private final CategoryRenderer<Target> categoriesRenderer =
             new CategoryRenderer<Target>() {
                 @Override
-                public void renderElement(Element element, final Target data) {
-                    element.setInnerText(data.getName());
+                public void renderElement(Element element, final Target target) {
+                    element.setInnerText(target.getName());
 
                     element.addClassName(commandResources.getCss().categorySubElementHeader());
+                    element.setId("target-" + target.getName());
 
-                    if (data.getRecipe() == null) {
+                    if (target.getRecipe() == null) {
                         element.getStyle().setProperty("color", "gray");
                     } else {
+                        if (target.isConnected()) {
+                            DivElement running = Document.get().createDivElement();
+                            running.setClassName(commandResources.getCss().running());
+                            element.appendChild(running);
+
+                            Tooltip.create((elemental.dom.Element) running,
+                                    BOTTOM,
+                                    MIDDLE,
+                                    "Connected");
+                        }
+
                         SpanElement categorySubElement = Document.get().createSpanElement();
                         categorySubElement.setClassName(commandResources.getCss().buttonArea());
                         element.appendChild(categorySubElement);
@@ -351,7 +384,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
                                 if (Event.ONCLICK == event.getTypeInt()) {
                                     event.stopPropagation();
                                     event.preventDefault();
-                                    delegate.onDeleteTarget(data);
+                                    delegate.onDeleteTarget(target);
                                 }
                             }
                         });
@@ -438,9 +471,24 @@ public class TargetsViewImpl extends Window implements TargetsView {
     }
 
     @Override
+    public void setConnectButtonText(String title) {
+        if (title == null || title.isEmpty()) {
+            connectButton.setText("");
+            connectButton.setHTML("<i></i>");
+        } else {
+            connectButton.setText(title);
+        }
+    }
+
+    @Override
     public void selectTargetName() {
         targetName.setFocus(true);
         targetName.selectAll();
+    }
+
+    @Override
+    public void setConnectionStatusText(String text) {
+        operationLabel.setText(text);
     }
 
 }

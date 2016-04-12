@@ -163,10 +163,19 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
     void enableConnectButton(boolean enable);
 
     /**
+     * Changes the text of Connect button.
+     *
+     * @param text
+     *          new text
+     */
+    void setConnectButtonText(String text);
+
+    void setConnectionStatusText(String text);
+
+    /**
      * Focuses and selects all the text in the Name field.
      */
     void selectTargetName();
-
 
 
     interface ActionDelegate {

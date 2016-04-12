@@ -38,6 +38,8 @@ public class Target {
      */
     private boolean dirty;
 
+    private boolean connected;
+
     public Target(String name, String type, RecipeDescriptor recipe) {
         this.name = name;
         this.type = type;
@@ -113,6 +115,14 @@ public class Target {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
 
 }

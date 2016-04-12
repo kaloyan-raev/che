@@ -13,9 +13,16 @@ package org.eclipse.che.ide.extension.machine.client.targets;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
+import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.RecipeServiceClient;
+import org.eclipse.che.api.machine.shared.dto.LimitsDto;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
@@ -23,6 +30,8 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -50,9 +59,13 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     private final MachineManager                        machineManager;
     private final NotificationManager                   notificationManager;
     private final MachineLocalizationConstant           machineLocale;
+    private final AppContext                            appContext;
+    private final MachineServiceClient                  machineService;
+    private final WorkspaceServiceClient                workspaceServiceClient;
 
     private final List<Target>                          targets = new ArrayList<>();
     private Target                                      selectedTarget;
+    private final List<MachineDto>                      machines = new ArrayList<>();
 
     @Inject
     public TargetsPresenter(final TargetsView view,
@@ -61,7 +74,10 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                             final DialogFactory dialogFactory,
                             final MachineManager machineManager,
                             final NotificationManager notificationManager,
-                            final MachineLocalizationConstant machineLocale) {
+                            final MachineLocalizationConstant machineLocale,
+                            final AppContext appContext,
+                            final MachineServiceClient machineService,
+                            final WorkspaceServiceClient workspaceServiceClient) {
         this.view = view;
         this.recipeServiceClient = recipeServiceClient;
         this.dtoFactory = dtoFactory;
@@ -69,6 +85,9 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         this.machineManager = machineManager;
         this.notificationManager = notificationManager;
         this.machineLocale = machineLocale;
+        this.appContext = appContext;
+        this.machineService = machineService;
+        this.workspaceServiceClient = workspaceServiceClient;
 
         view.setDelegate(this);
     }
@@ -83,35 +102,74 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                getTargets();
+                updateTargets(null);
             }
         });
     }
 
     /**
-     * Fetches all recipes from the server and makes a list of targets.
+     * Fetches all recipes from the server, makes a list of targets and selects specified target.
      */
-    private void getTargets() {
+    private void updateTargets(final String targetToSelect) {
         targets.clear();
+        machines.clear();
 
-        recipeServiceClient.getAllRecipes().then(new Operation<List<RecipeDescriptor>>() {
+        machineService.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
             @Override
-            public void apply(List<RecipeDescriptor> recipeList) throws OperationException {
-                for (RecipeDescriptor recipe : recipeList) {
-                    // Display only "ssh" recipes
-                    if (!"ssh".equalsIgnoreCase(recipe.getType())) {
-                        continue;
+            public void apply(List<MachineDto> list) throws OperationException {
+                machines.addAll(list);
+
+                recipeServiceClient.getAllRecipes().then(new Operation<List<RecipeDescriptor>>() {
+                    @Override
+                    public void apply(List<RecipeDescriptor> recipeList) throws OperationException {
+                        for (RecipeDescriptor recipe : recipeList) {
+                            // Display only "ssh" recipes
+                            if (!"ssh".equalsIgnoreCase(recipe.getType())) {
+                                continue;
+                            }
+
+                            Target target = new Target(recipe.getName(), recipe.getType(), recipe);
+                            target.setRecipe(recipe);
+                            targets.add(target);
+
+                            target.setConnected(isMachineRunning(recipe.getName()));
+
+                            restoreTarget(target);
+                        }
+
+                        view.showTargets(targets);
+
+                        if (targetToSelect != null) {
+                            for (Target target : targets) {
+                                if (target.getName().equals(targetToSelect)) {
+                                    view.selectTarget(target);
+                                    break;
+                                }
+                            }
+                        }
                     }
+                });
 
-                    Target target = new Target(recipe.getName(), recipe.getType(), recipe);
-                    target.setRecipe(recipe);
-                    targets.add(target);
-
-                    restoreTarget(target);
-                }
-                view.showTargets(targets);
             }
         });
+    }
+
+    /**
+     * Determines whether machine is running or not.
+     *
+     * @return
+     *      true for running machine
+     */
+    private boolean isMachineRunning(String machineName) {
+        for (MachineDto machine : machines) {
+            if (machine.getConfig().getName().equals(machineName) &&
+                    "persistent".equals(machine.getConfig().getType()) &&
+                    machine.getStatus() == MachineStatus.RUNNING) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -152,6 +210,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         target.setUserName("root");
         target.setPassword("root");
         target.setDirty(true);
+        target.setConnected(false);
         targets.add(target);
 
         view.showTargets(targets);
@@ -241,12 +300,22 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         updateButtons();
     }
 
+    /**
+     * Updates buttons state.
+     */
     private void updateButtons() {
         if (selectedTarget == null) {
             return;
         }
 
         view.enableConnectButton(!selectedTarget.isDirty());
+
+        if (selectedTarget.isConnected()) {
+            view.setConnectButtonText("Disconnect");
+        } else {
+            view.setConnectButtonText("Connect");
+        }
+
         view.enableCancelButton(selectedTarget.isDirty());
 
         if (StringUtils.isNullOrEmpty(view.getTargetName()) ||
@@ -374,12 +443,137 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
 
     @Override
     public void onConnectClicked() {
-        if (selectedTarget.getRecipe() == null) {
+        if (selectedTarget == null || selectedTarget.getRecipe() == null) {
             return;
         }
 
-        String recipeURl = selectedTarget.getRecipe().getLink("get recipe script").getHref();
-        machineManager.startSSHMachine(recipeURl, selectedTarget.getName());
+        if (selectedTarget.isConnected()) {
+            disconnect();
+        } else {
+            connect();
+        }
+    }
+
+    private StatusNotification connectNotification;
+
+    /**
+     * Opens a connection to the selected target.
+     * Starts a machine based on the selected recipe.
+     */
+    private void connect() {
+        view.setConnectButtonText(null);
+
+        connectNotification = notificationManager.notify(machineLocale.targetsViewConnectProgress(selectedTarget.getName()), StatusNotification.Status.PROGRESS, true);
+
+        String recipeURL = selectedTarget.getRecipe().getLink("get recipe script").getHref();
+
+        LimitsDto limitsDto = dtoFactory.createDto(LimitsDto.class).withRam(1024);
+        MachineSourceDto sourceDto = dtoFactory.createDto(MachineSourceDto.class).withType("ssh-config").withLocation(recipeURL);
+
+        MachineConfigDto configDto = dtoFactory.createDto(MachineConfigDto.class)
+                .withDev(false)
+                .withName(selectedTarget.getName())
+                .withSource(sourceDto)
+                .withLimits(limitsDto)
+                .withType("persistent");
+
+        Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
+
+        machinePromise.then(new Operation<MachineDto>() {
+            @Override
+            public void apply(final MachineDto machineDto) throws OperationException {
+                ensureMachineIsStarted(machineDto.getId());
+            }
+        });
+
+        machinePromise.catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError promiseError) throws OperationException {
+                onConnectingFailed();
+            }
+        });
+    }
+
+    /**
+     * Ensures machine is started.
+     */
+    private void ensureMachineIsStarted(final String machineId) {
+        machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+            @Override
+            public void apply(MachineDto machineDto) throws OperationException {
+                if (machineDto.getStatus() == MachineStatus.RUNNING) {
+                    onConnected();
+                } else {
+                    new Timer() {
+                        @Override
+                        public void run() {
+                            ensureMachineIsStarted(machineId);
+                        }
+                    }.schedule(1000);
+                }
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                onConnectingFailed();
+            }
+        });
+    }
+
+    /**
+     * Displays a notification
+     */
+    private void onConnected() {
+        connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(selectedTarget.getName()));
+        connectNotification.setStatus(StatusNotification.Status.SUCCESS);
+        updateTargets(selectedTarget.getName());
+    }
+
+    private void onConnectingFailed() {
+        connectNotification.setTitle(machineLocale.targetsViewConnectError(selectedTarget.getName()));
+        connectNotification.setStatus(StatusNotification.Status.FAIL);
+
+        view.selectTarget(selectedTarget);
+    }
+
+    /**
+     * Closes the connection to the selected target.
+     * Destroys a machine based on the selected recipe.
+     */
+    private void disconnect() {
+        if (selectedTarget == null || !selectedTarget.isConnected()) {
+            return;
+        }
+
+        String machineId = null;
+        for (MachineDto machine : machines) {
+            if (machine.getConfig().getName().equals(selectedTarget.getName()) &&
+                    "persistent".equals(machine.getConfig().getType()) &&
+                    machine.getStatus() == MachineStatus.RUNNING) {
+                machineId = machine.getId();
+                break;
+            }
+        }
+
+        if (machineId == null) {
+            return;
+        }
+
+        view.setConnectButtonText(null);
+
+        machineService.destroyMachine(machineId).then(new Operation<Void>() {
+            @Override
+            public void apply(Void arg) throws OperationException {
+                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()), StatusNotification.Status.SUCCESS, true);
+                updateTargets(selectedTarget.getName());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                notificationManager.notify(machineLocale.targetsViewDisconnectError(selectedTarget.getName()), StatusNotification.Status.FAIL, true);
+                updateTargets(selectedTarget.getName());
+            }
+        });
     }
 
     @Override
@@ -388,26 +582,11 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 new ConfirmCallback() {
                     @Override
                     public void accepted() {
-                        Promise<Void> deletePromice = recipeServiceClient.removeRecipe(target.getRecipe().getId());
-                        deletePromice.then(new Operation<Void>() {
-                            @Override
-                            public void apply(Void arg) throws OperationException {
-                                targets.remove(target);
-                                view.showTargets(targets);
-
-                                view.selectTarget(null);
-                                view.showHintPanel();
-
-                                notificationManager.notify(machineLocale.targetsViewDeleteSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
-                            }
-                        });
-
-                        deletePromice.catchError(new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError arg) throws OperationException {
-                                dialogFactory.createMessageDialog("Error", machineLocale.targetsViewDeleteError(target.getName()), null).show();
-                            }
-                        });
+                        if (target.isConnected()) {
+                            disconnectAndDelete(target);
+                        } else {
+                            deleteTarget(target);
+                        }
                     }
                 }, new CancelCallback() {
                     @Override
@@ -416,11 +595,69 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 }).show();
     }
 
-    private void log(String msg) {
+    private void disconnectAndDelete(final Target target) {
+        String machineId = null;
+        for (MachineDto machine : machines) {
+            if (machine.getConfig().getName().equals(target.getName()) &&
+                    "persistent".equals(machine.getConfig().getType()) &&
+                    machine.getStatus() == MachineStatus.RUNNING) {
+                machineId = machine.getId();
+                break;
+            }
+        }
+
+        if (machineId == null) {
+            return;
+        }
+
+        machineService.destroyMachine(machineId).then(new Operation<Void>() {
+            @Override
+            public void apply(Void arg) throws OperationException {
+                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
+                new Timer() {
+                    @Override
+                    public void run() {
+                        deleteTarget(target);
+                    }
+                }.schedule(1000);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                notificationManager.notify(machineLocale.targetsViewDisconnectError(target.getName()), StatusNotification.Status.FAIL, true);
+                updateTargets(target.getName());
+            }
+        });
     }
 
-//    private native void log(String msg) /*-{
-//        console.log(msg);
-//    }-*/;
+    /**
+     * Deletes specified  target.
+     *
+     * @param target
+     *          target to delete
+     */
+    private void deleteTarget(final Target target) {
+        Promise<Void> deletePromice = recipeServiceClient.removeRecipe(target.getRecipe().getId());
+        deletePromice.then(new Operation<Void>() {
+            @Override
+            public void apply(Void arg) throws OperationException {
+                targets.remove(target);
+                view.showTargets(targets);
+
+                view.selectTarget(null);
+                view.showHintPanel();
+
+                notificationManager.notify(machineLocale.targetsViewDeleteSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
+            }
+        });
+
+        deletePromice.catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                dialogFactory.createMessageDialog("Error", machineLocale.targetsViewDeleteError(target.getName()), null).show();
+            }
+        });
+
+    }
 
 }
