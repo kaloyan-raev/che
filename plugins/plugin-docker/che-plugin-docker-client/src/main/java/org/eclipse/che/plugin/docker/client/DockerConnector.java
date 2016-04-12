@@ -84,7 +84,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -1415,7 +1414,6 @@ public class DockerConnector {
     /**
      * The same as {@link #addQueryParamIfSet(DockerConnection, String, Object)}, but
      * in case of {@code paramValue} is {@code true} '1' will be added as parameter value, in case of {@code false} '0'.
-     *
      */
     private void addQueryParamIfSet(DockerConnection connection, String queryParamName, Boolean paramValue) {
         if (paramValue != null && queryParamName != null && !queryParamName.equals("")) {

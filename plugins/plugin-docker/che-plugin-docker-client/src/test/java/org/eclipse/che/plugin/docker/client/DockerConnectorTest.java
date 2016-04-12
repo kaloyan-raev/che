@@ -62,6 +62,7 @@ public class DockerConnectorTest {
         when(dockerConnection.method(any())).thenReturn(dockerConnection);
         when(dockerConnection.entity(any(InputStream.class))).thenReturn(dockerConnection);
         when(dockerConnection.headers(any())).thenReturn(dockerConnection);
+        when(dockerConnection.header(any())).thenReturn(dockerConnection);
         when(dockerConnection.query(any(), anyVararg())).thenReturn(dockerConnection);
         when(dockerConnection.path(anyString())).thenReturn(dockerConnection);
         when(dockerConnection.request()).thenReturn(dockerResponse);
