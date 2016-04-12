@@ -59,37 +59,27 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
  */
 public abstract class BaseTest {
 
-    protected static final String wsPath        = "target/workspace";
-    protected final static String INDEX_PATH    = "target/fs_index";
+    protected static final String wsPath     = "target/workspace";
+    protected final static String INDEX_PATH = "target/fs_index";
 
-    protected static Map<String, String> options = new HashMap<>();
-    protected static EventService eventService = new EventService();
+    protected static Map<String, String> options      = new HashMap<>();
+    protected static EventService        eventService = new EventService();
     protected static ResourcesPlugin plugin;
-    protected static JavaPlugin        javaPlugin        = new JavaPlugin(wsPath + "/set");
+    protected static JavaPlugin        javaPlugin        = new JavaPlugin(wsPath + "/set", null, null);
     protected static FileBuffersPlugin fileBuffersPlugin = new FileBuffersPlugin();
     protected static TestWorkspaceHolder workspaceHolder;
-
-    protected File root;
-
-    protected ProjectManager pm;
-
-    protected LocalVirtualFileSystemProvider vfsProvider;
-
-    protected ProjectRegistry projectRegistry;
-
-    protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
-
-    protected FileTreeWatcher fileTreeWatcher;
-
-    protected ProjectTypeRegistry projectTypeRegistry;
-
-    protected ProjectHandlerRegistry projectHandlerRegistry;
-
-    protected ProjectImporterRegistry importerRegistry;
-
     private final String mavenServerPath = BaseTest.class.getResource("/maven-server").getPath();
-
+    protected File root;
+    protected ProjectManager pm;
+    protected LocalVirtualFileSystemProvider vfsProvider;
+    protected ProjectRegistry projectRegistry;
+    protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
+    protected FileTreeWatcher fileTreeWatcher;
+    protected ProjectTypeRegistry projectTypeRegistry;
+    protected ProjectHandlerRegistry projectHandlerRegistry;
+    protected ProjectImporterRegistry importerRegistry;
     protected MavenServerManager mavenServerManager;
+
     public BaseTest() {
         options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
         options.put(JavaCore.CORE_ENCODING, "UTF-8");
@@ -150,7 +140,8 @@ public abstract class BaseTest {
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
 
-        plugin = new ResourcesPlugin("target/index", wsPath, projectRegistry, pm);
+        plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> pm);
+
         plugin.start();
         javaPlugin.start();
 
@@ -211,7 +202,7 @@ public abstract class BaseTest {
             throws ServerException, NotFoundException, ConflictException, ForbiddenException {
         FolderEntry folder = pm.getProjectsRoot().createFolder(name);
         folder.createFile("pom.xml", getPomContent(pomContent).getBytes());
-        projectRegistry.setProjectType(folder.getPath().toString(),MAVEN_ID, false);
+        projectRegistry.setProjectType(folder.getPath().toString(), MAVEN_ID, false);
 
         //inform DeltaProcessingStat about new project
         JavaModelManager.getJavaModelManager().deltaState.resourceChanged(
