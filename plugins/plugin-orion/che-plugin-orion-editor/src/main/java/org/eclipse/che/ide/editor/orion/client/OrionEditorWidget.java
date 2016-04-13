@@ -25,7 +25,6 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -63,7 +62,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionProblemOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionRulerClickEventOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
-import org.eclipse.che.ide.editor.orion.client.jso.OrionTextThemeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
 import org.eclipse.che.ide.hotkeys.HotKeyItem;
@@ -104,13 +102,11 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.eclipse.che.ide.editor.orion.client.KeyMode.EMACS;
 import static org.eclipse.che.ide.editor.orion.client.KeyMode.VI;
-import static org.eclipse.che.ide.jseditor.client.preference.editorproperties.EditorProperties.THEME;
 
 /**
  * Orion implementation for {@link EditorWidget}.
