@@ -75,8 +75,9 @@ public class Machine {
         MachineSourceDto machineSource = descriptor.getConfig().getSource();
 
         String machineSourceType = machineSource.getType();
-// todo
-        if ("recipe".equalsIgnoreCase(machineSourceType)) {
+
+        // recipe is left for backward compatibility
+        if ("recipe".equalsIgnoreCase(machineSourceType) || "dockerfile".equalsIgnoreCase(machineSourceType)) {
             return machineSource.getLocation();
         }
 
