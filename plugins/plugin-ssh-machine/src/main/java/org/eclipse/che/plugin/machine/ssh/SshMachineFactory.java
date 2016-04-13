@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Provides ssh machine implementation instances.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public interface SshMachineFactory {
 

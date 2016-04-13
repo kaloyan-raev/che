@@ -24,7 +24,7 @@ import java.io.InputStreamReader;
 /**
  * JSch implementation of {@link SshProcess}
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class JschSshProcess implements SshProcess {
     private final ChannelExec exec;

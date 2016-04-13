@@ -16,7 +16,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 /**
  * Machine implementation specific launcher of websocket terminal.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public interface MachineImplSpecificTerminalLauncher {
     /**

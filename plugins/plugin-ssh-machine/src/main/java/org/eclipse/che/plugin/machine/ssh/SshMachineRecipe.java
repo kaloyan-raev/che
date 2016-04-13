@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Recipe of connection to ssh machine using ssh protocol.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class SshMachineRecipe {
 

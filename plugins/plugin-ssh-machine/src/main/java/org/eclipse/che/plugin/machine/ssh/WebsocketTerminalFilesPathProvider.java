@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Provides path to websocket terminal archive.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 @Singleton
 public class WebsocketTerminalFilesPathProvider {

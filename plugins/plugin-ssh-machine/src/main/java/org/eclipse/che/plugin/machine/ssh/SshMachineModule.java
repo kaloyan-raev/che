@@ -20,7 +20,7 @@ import org.eclipse.che.api.machine.server.terminal.MachineImplSpecificTerminalLa
 /**
  * Provides bindings needed for ssh machine implementation usage.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class SshMachineModule extends AbstractModule {
     @Override

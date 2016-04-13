@@ -16,7 +16,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 /**
  * Represents process created with {@link SshClient}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public interface SshProcess {
     void start() throws MachineException;

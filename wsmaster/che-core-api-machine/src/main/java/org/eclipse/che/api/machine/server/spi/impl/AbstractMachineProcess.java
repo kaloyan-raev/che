@@ -16,7 +16,7 @@ import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import java.util.Map;
 
 /**
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public abstract class AbstractMachineProcess implements InstanceProcess {
     private final String              name;

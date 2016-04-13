@@ -52,7 +52,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 /**
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 @Listeners(MockitoTestNGListener.class)
 public class SshMachineInstanceProviderTest {

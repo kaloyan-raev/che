@@ -34,7 +34,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * <p>Adds user token if target url points to current CHE server.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class RecipeDownloader {
     private static final Logger LOG = getLogger(RecipeDownloader.class);

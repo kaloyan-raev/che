@@ -15,7 +15,7 @@ import com.jcraft.jsch.UserInfo;
 /**
  * Implementation of {@link UserInfo}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class JschUserInfoImpl implements UserInfo {
     private final String  password;

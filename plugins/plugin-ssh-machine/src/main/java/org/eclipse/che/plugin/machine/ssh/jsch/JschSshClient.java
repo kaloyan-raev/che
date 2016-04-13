@@ -43,7 +43,7 @@ import static java.lang.String.format;
 /**
  * Client for communication with ssh machine using ssh protocol.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 // todo think about replacement JSch with Apace SSHD
 // todo tests for ssh library that ensures that it works as expected
