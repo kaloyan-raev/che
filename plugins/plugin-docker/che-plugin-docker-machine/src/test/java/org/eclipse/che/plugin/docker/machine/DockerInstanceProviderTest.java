@@ -43,8 +43,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.UriBuilder;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -145,7 +143,7 @@ public class DockerInstanceProviderTest {
 
     @Test
     public void shouldReturnRecipeTypesDockerfile() throws Exception {
-        assertEquals(dockerInstanceProvider.getRecipeTypes(), Collections.singleton("Dockerfile"));
+        assertEquals(dockerInstanceProvider.getRecipeTypes(), Collections.singleton("dockerfile"));
     }
 
     // TODO add tests for instance snapshot removal
@@ -275,7 +273,8 @@ public class DockerInstanceProviderTest {
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
                                                       asList(new ServerConfImpl("ref1", "8080", "https", null),
                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
-                                                      Collections.singletonMap("key1", "value1")),
+                                                      Collections.singletonMap("key1", "value1"),
+                                                      null),
                                 "machineId",
                                 WORKSPACE_ID,
                                 "envName",
@@ -309,7 +308,8 @@ public class DockerInstanceProviderTest {
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
                                                       asList(new ServerConfImpl("ref1", "8080", "https", null),
                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
-                                                      Collections.singletonMap("key1", "value1")),
+                                                      Collections.singletonMap("key1", "value1"),
+                                                      null),
                                 "machineId",
                                 WORKSPACE_ID,
                                 "envName",
@@ -1722,6 +1722,7 @@ public class DockerInstanceProviderTest {
                                                                                                       "9090/udp",
                                                                                                       "someprotocol",
                                                                                                       null)),
-                                                                            Collections.singletonMap("key1", "value1")));
+                                                                            Collections.singletonMap("key1", "value1"),
+                                                                            null));
     }
 }
