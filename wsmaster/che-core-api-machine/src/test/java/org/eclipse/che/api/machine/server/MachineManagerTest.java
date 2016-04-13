@@ -26,7 +26,7 @@ import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
-import org.eclipse.che.api.machine.server.util.DownloadRecipeUtil;
+import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.wsagent.WsAgentLauncher;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -74,7 +74,7 @@ public class MachineManagerTest {
     @Mock
     private MachineInstanceProviders machineInstanceProviders;
     @Mock
-    private DownloadRecipeUtil       downloadRecipeUtil;
+    private RecipeDownloader         recipeDownloader;
     @Mock
     private InstanceProvider         instanceProvider;
     @Mock
@@ -101,7 +101,7 @@ public class MachineManagerTest {
                                          eventService,
                                          DEFAULT_MACHINE_MEMORY_SIZE_MB,
                                          wsAgentLauncher,
-                                         downloadRecipeUtil));
+                                         recipeDownloader));
 
         EnvironmentContext envCont = new EnvironmentContext();
         envCont.setUser(new UserImpl(null, USER_ID, null, null, false));
@@ -110,7 +110,7 @@ public class MachineManagerTest {
         RecipeImpl recipe = new RecipeImpl().withScript("script").withType("Dockerfile");
 //        doNothing().when(manager).createMachineLogsDir(anyString());
         doReturn(MACHINE_ID).when(manager).generateMachineId();
-        when(downloadRecipeUtil.getRecipe(any(MachineConfig.class))).thenReturn(recipe);
+        when(recipeDownloader.getRecipe(any(MachineConfig.class))).thenReturn(recipe);
         when(machineInstanceProviders.getProvider(anyString())).thenReturn(instanceProvider);
         HashSet<String> recipeTypes = new HashSet<>();
         recipeTypes.add("test type 1");
@@ -127,8 +127,8 @@ public class MachineManagerTest {
 
     @Test(expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "Invalid machine name @name!")
     public void shouldThrowExceptionOnMachineCreationIfMachineNameIsInvalid() throws Exception {
-        when(downloadRecipeUtil.getRecipe(any(MachineConfig.class))).thenReturn(new RecipeImpl().withScript("script")
-                                                                                                .withType("Dockerfile"));
+        when(recipeDownloader.getRecipe(any(MachineConfig.class))).thenReturn(new RecipeImpl().withScript("script")
+                                                                                              .withType("Dockerfile"));
 
         MachineConfig machineConfig = new MachineConfigImpl(false,
                                                             "@name!",

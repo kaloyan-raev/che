@@ -210,10 +210,13 @@ public class JschSshClient implements SshClient {
 
             // apply permissions
             File file = new File(sourcePath);
+            // read
             int permissions = 4;
+            // execute
             if (file.canExecute()) {
                 permissions += 1;
             }
+            // write
             if (file.canWrite()) {
                 permissions += 2;
             }

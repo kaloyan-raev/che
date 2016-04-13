@@ -42,7 +42,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
-import org.eclipse.che.api.machine.server.util.DownloadRecipeUtil;
+import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.machine.wsagent.WsAgentLauncher;
@@ -100,7 +100,7 @@ public class MachineManager {
     private final int                      defaultMachineMemorySizeMB;
     private final MachineCleaner           machineCleaner;
     private final WsAgentLauncher          wsAgentLauncher;
-    private final DownloadRecipeUtil       downloadRecipeUtil;
+    private final RecipeDownloader         recipeDownloader;
 
     @Inject
     public MachineManager(SnapshotDao snapshotDao,
@@ -110,12 +110,12 @@ public class MachineManager {
                           EventService eventService,
                           @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB,
                           WsAgentLauncher wsAgentLauncher,
-                          DownloadRecipeUtil downloadRecipeUtil) {
+                          RecipeDownloader recipeDownloader) {
         this.snapshotDao = snapshotDao;
         this.machineInstanceProviders = machineInstanceProviders;
         this.eventService = eventService;
         this.wsAgentLauncher = wsAgentLauncher;
-        this.downloadRecipeUtil = downloadRecipeUtil;
+        this.recipeDownloader = recipeDownloader;
         this.machineLogsDir = new File(machineLogsDir);
         this.machineRegistry = machineRegistry;
         this.defaultMachineMemorySizeMB = defaultMachineMemorySizeMB;
@@ -299,7 +299,7 @@ public class MachineManager {
         if (snapshot != null) {
             instanceKey = snapshot.getInstanceKey();
         } else {
-            recipe = downloadRecipeUtil.getRecipe(machineConfig);
+            recipe = recipeDownloader.getRecipe(machineConfig);
         }
 
         if (!MACHINE_DISPLAY_NAME_PATTERN.matcher(machineConfig.getName()).matches()) {

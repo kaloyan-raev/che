@@ -12,11 +12,11 @@ package org.eclipse.che.api.machine.server.util;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Downloads machine recipe set in machine source.
@@ -35,11 +36,13 @@ import static java.lang.String.format;
  *
  * author Alexander Garagatyi
  */
-public class DownloadRecipeUtil {
+public class RecipeDownloader {
+    private static final Logger LOG = getLogger(RecipeDownloader.class);
+
     private final String apiEndpoint;
 
     @Inject
-    public DownloadRecipeUtil(@Named("api.endpoint") String apiEndpoint) {
+    public RecipeDownloader(@Named("api.endpoint") String apiEndpoint) {
         this.apiEndpoint = apiEndpoint;
     }
 
@@ -76,7 +79,9 @@ public class DownloadRecipeUtil {
                                               e.getLocalizedMessage()));
         } finally {
             if (file != null) {
-                FileCleaner.addFile(file);
+                if (file.delete()) {
+                    LOG.error(String.format("Removal of recipe file %s failed.", file.getAbsolutePath()));
+                }
             }
         }
     }
