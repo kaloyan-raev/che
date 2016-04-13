@@ -11,8 +11,8 @@
 package org.eclipse.che.plugin.machine.ssh;
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.core.util.NoCloseLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -78,9 +79,15 @@ public class SshMachineImplTerminalLauncher implements MachineImplSpecificTermin
                                                                                       null),
                                                                       null);
 
-                startTerminal.start((NoCloseLineConsumer)line -> {
-                    machine.getLogger().writeLine("[Terminal] " + line);
-                });
+                startTerminal.start(new LineConsumer() {
+                                        @Override
+                                        public void writeLine(String line) throws IOException {
+                                            machine.getLogger().writeLine("[Terminal] " + line);
+                                        }
+
+                                        @Override
+                                        public void close() throws IOException {}
+                                    });
             } else if (!"found".equals(checkAliveText)) {
                 LOG.error("Unexpected output of websocket terminal check. Output:" + checkAliveText);
             }
