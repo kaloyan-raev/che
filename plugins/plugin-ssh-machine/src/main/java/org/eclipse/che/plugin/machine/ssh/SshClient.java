@@ -15,7 +15,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 /**
  * Client for communication with ssh machine using ssh protocol.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public interface SshClient {
 
