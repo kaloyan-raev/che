@@ -13,19 +13,52 @@ package org.eclipse.che.plugin.machine.ssh;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 
 /**
- * Client for communication with ssh machine using ssh protocol.
+ * Client for communication with ssh machine using SSH protocol.
+ *
+ * <p/>Client should be started with {{@link #start()}} before performing communication with a server.
+ * <br/>Server should be stopped with {{@link #stop()}} after finishing of communication with a server.
  *
  * @author Alexander Garagatyi
  */
 public interface SshClient {
 
+    /**
+     * Gets address of server this SSH client is connected to.
+     */
     String getHost();
 
+    /**
+     * Starts ssh client.
+     *
+     * <p/>Client should be stopped to perform connection cleanup on SSH server.
+     */
     void start() throws MachineException;
 
+    /**
+     * Stops client to perform connection cleanup on SSH server.
+     */
     void stop() throws MachineException;
 
+    /**
+     * Creates {@link SshProcess} that represents command that can be started over SSH protocol.
+     *
+     * @param commandLine
+     *         command line to start over SSH
+     * @return ssh process, it should be started separately.
+     * @throws MachineException
+     */
     SshProcess createProcess(String commandLine) throws MachineException;
 
+    /**
+     * Copies file(s) from local machine to remote machine using SSH protocol.
+     *
+     * <p/>Copying can be performed using SCP or SFTP.
+     *
+     * @param sourcePath
+     *         path on localhost that should be copied
+     * @param targetPath
+     *         path on remote host where file(s) from sourcePath should be copied
+     * @throws MachineException
+     */
     void copy(String sourcePath, String targetPath) throws MachineException;
 }
