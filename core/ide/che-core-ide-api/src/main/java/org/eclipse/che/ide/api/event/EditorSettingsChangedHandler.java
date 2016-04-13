@@ -8,23 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.jseditor.client.preference;
+package org.eclipse.che.ide.api.event;
 
-import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.event.shared.EventHandler;
 
 /**
- * I18n Constants for the preference window.
+ * Is fired when editor's settings has been changed.
  *
- * @author "Mickaël Leduque"
+ * @author Roman Nikitenko
  */
-public interface EditorPrefLocalizationConstant extends Messages {
+public interface EditorSettingsChangedHandler extends EventHandler {
 
-    @Key("editortype.title")
-    String editorTypeTitle();
+    /**
+     * Perform actions when editor's settings has been changed.
+     *
+     * @param event
+     *         workspace stopped event
+     */
+    void onEditorSettingsChanged(EditorSettingsChangedEvent event);
 
-    @Key("editortype.category")
-    String editorTypeCategory();
-
-    @DefaultMessage("Key Bindings:")
-    String keybindingsSectionLabel();
 }
