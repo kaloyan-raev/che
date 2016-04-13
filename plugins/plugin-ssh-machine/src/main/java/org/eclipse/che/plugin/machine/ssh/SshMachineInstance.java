@@ -30,13 +30,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
@@ -115,14 +114,11 @@ public class SshMachineInstance extends AbstractInstance {
     @Override
     public List<InstanceProcess> getProcesses() throws MachineException {
         // todo get children of session process
-        Map<Integer, InstanceProcess> aliveProcesses = machineProcesses.values()
-                                                                       .stream()
-                                                                       .filter(InstanceProcess::isAlive)
-                                                                       .collect(toMap(InstanceProcess::getPid,
-                                                                                      Function.identity()));
-        machineProcesses.putAll(aliveProcesses);
+        return machineProcesses.values()
+                               .stream()
+                               .filter(InstanceProcess::isAlive)
+                               .collect(Collectors.toList());
 
-        return new ArrayList<>(aliveProcesses.values());
     }
 
     @Override
