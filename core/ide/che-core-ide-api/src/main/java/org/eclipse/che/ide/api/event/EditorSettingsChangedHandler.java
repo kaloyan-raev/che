@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.event;
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Is fired when editor's settings has been changed.
+ * Handles Editor Settings Changed Event
  *
  * @author Roman Nikitenko
  */
@@ -23,7 +23,7 @@ public interface EditorSettingsChangedHandler extends EventHandler {
      * Perform actions when editor's settings has been changed.
      *
      * @param event
-     *         workspace stopped event
+     *         editor's settings changed event
      */
     void onEditorSettingsChanged(EditorSettingsChangedEvent event);
 
