@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class EditorPropertiesSectionViewImpl extends Composite implements EditorPropertiesSectionView, EditorPropertyWidget.ActionDelegate {
 
-    private static final CompilerSetupViewImplUiBinder UI_BINDER = GWT.create(CompilerSetupViewImplUiBinder.class);
+    private static final EditorPropertiesSectionViewImplUiBinder UI_BINDER = GWT.create(EditorPropertiesSectionViewImplUiBinder.class);
 
     @UiField
     FlowPanel propertiesPanel;
@@ -93,6 +93,6 @@ public class EditorPropertiesSectionViewImpl extends Composite implements Editor
         properties.put(propertyId, propertyWidget);
     }
 
-    interface CompilerSetupViewImplUiBinder extends UiBinder<Widget, EditorPropertiesSectionViewImpl> {
+    interface EditorPropertiesSectionViewImplUiBinder extends UiBinder<Widget, EditorPropertiesSectionViewImpl> {
     }
 }

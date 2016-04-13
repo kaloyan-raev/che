@@ -48,7 +48,6 @@ import static org.eclipse.che.ide.jseditor.client.preference.editorproperties.Ed
  *
  * @author Roman Nikitenko
  */
-
 @Singleton
 public class EditorPropertiesManager {
 

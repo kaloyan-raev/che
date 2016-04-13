@@ -22,7 +22,11 @@ import org.eclipse.che.ide.jseditor.client.preference.EditorPreferenceSection;
 
 import java.util.Map;
 
-/** Presenter for the editor properties section in the 'Preferences' menu. */
+/**
+ * Presenter for the editor properties section in the 'Preferences' menu.
+ *
+ * @author Roman Nikitenko
+ */
 public class EditorPropertiesSectionPresenter implements EditorPreferenceSection, EditorPropertiesSectionView.ActionDelegate, WsAgentStateHandler {
     /** The preference page presenter. */
     private       ParentPresenter             parentPresenter;
