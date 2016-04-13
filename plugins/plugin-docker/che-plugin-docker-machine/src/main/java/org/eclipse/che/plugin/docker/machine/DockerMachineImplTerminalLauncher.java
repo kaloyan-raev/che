@@ -46,25 +46,24 @@ public class DockerMachineImplTerminalLauncher implements MachineImplSpecificTer
 
     @Override
     public void launchTerminal(Instance machine) throws MachineException {
-        if (DockerInstance.class.isAssignableFrom(machine.getClass())) {
-            try {
-                final String container = ((DockerInstance)machine).getContainer();
-
-                final Exec exec = docker.createExec(container, true, "/bin/bash", "-c", terminalStartCommand);
-
-                docker.startExec(exec.getId(), logMessage -> {
-                    if (logMessage.getType() == LogMessage.Type.STDERR) {
-                        try {
-                            machine.getLogger().writeLine("Terminal error. %s" + logMessage.getContent());
-                        } catch (IOException ignore) {
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                throw new MachineException(e.getLocalizedMessage(), e);
-            }
-        } else {
+        if (!(machine instanceof DockerInstance)) {
             throw new MachineException("Docker terminal launcher was used to launch terminal in non-docker machine.");
+        }
+        try {
+            final String container = ((DockerInstance)machine).getContainer();
+
+            final Exec exec = docker.createExec(container, true, "/bin/bash", "-c", terminalStartCommand);
+
+            docker.startExec(exec.getId(), logMessage -> {
+                if (logMessage.getType() == LogMessage.Type.STDERR) {
+                    try {
+                        machine.getLogger().writeLine("Terminal error. %s" + logMessage.getContent());
+                    } catch (IOException ignore) {
+                    }
+                }
+            });
+        } catch (IOException e) {
+            throw new MachineException(e.getLocalizedMessage(), e);
         }
     }
 }
