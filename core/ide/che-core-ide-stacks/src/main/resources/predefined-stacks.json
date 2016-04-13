@@ -43,7 +43,7 @@
               },
               "source": {
                 "location": "stub",
-                "type": "recipe"
+                "type": "dockerfile"
               },
               "type": "docker",
               "dev": true
@@ -110,7 +110,7 @@
               },
               "source": {
                 "location": "stub",
-                "type": "recipe"
+                "type": "dockerfile"
               },
               "type": "docker",
               "dev": true
@@ -177,7 +177,7 @@
               },
               "source": {
                 "location": "stub",
-                "type": "recipe"
+                "type": "dockerfile"
               },
               "type": "docker",
               "dev": true
