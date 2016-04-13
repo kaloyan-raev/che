@@ -92,7 +92,6 @@ public class EditorPropertiesSectionPresenter implements EditorPreferenceSection
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
-        //do nothing
     }
 
     private void addEditorProperties() {
