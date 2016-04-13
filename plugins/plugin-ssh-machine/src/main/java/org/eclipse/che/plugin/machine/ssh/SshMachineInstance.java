@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * Implementation of {@link Instance} that uses represents ssh machine.
@@ -83,13 +83,17 @@ public class SshMachineInstance extends AbstractInstance {
     public MachineRuntimeInfoImpl getRuntime() {
         // lazy initialization
         if (machineRuntime == null) {
-            UriBuilder uriBuilder = UriBuilder.fromUri("http://" + sshClient.getHost());
+            synchronized (this) {
+                if (machineRuntime == null) {
+                    UriBuilder uriBuilder = UriBuilder.fromUri("http://" + sshClient.getHost());
 
-            Map<String, ServerImpl> servers = machinesServers.stream()
-                                                             .collect(toMap(ServerConf::getPort,
-                                                                            serverConf -> serverConfToServer(serverConf,
-                                                                                                             uriBuilder.clone())));
-            machineRuntime = new MachineRuntimeInfoImpl(emptyMap(), emptyMap(), servers);
+                    final Map<String, ServerImpl> servers = new HashMap<>();
+                    for (ServerConf serverConf : machinesServers) {
+                        servers.put(serverConf.getPort(), serverConfToServer(serverConf, uriBuilder.clone()));
+                    }
+                    machineRuntime = new MachineRuntimeInfoImpl(emptyMap(), emptyMap(), servers);
+                }
+            }
             // todo get env from client
         }
         return machineRuntime;
@@ -98,16 +102,15 @@ public class SshMachineInstance extends AbstractInstance {
     @Override
     public InstanceProcess getProcess(final int pid) throws NotFoundException, MachineException {
         final InstanceProcess machineProcess = machineProcesses.get(pid);
-        if (machineProcess != null) {
-            try {
-                machineProcess.checkAlive();
-                return machineProcess;
-            } catch (NotFoundException e) {
-                machineProcesses.remove(pid);
-                throw e;
-            }
-        } else {
+        if (machineProcess == null) {
             throw new NotFoundException(format("Process with pid %s not found", pid));
+        }
+        try {
+            machineProcess.checkAlive();
+            return machineProcess;
+        } catch (NotFoundException e) {
+            machineProcesses.remove(pid);
+            throw e;
         }
     }
 
