@@ -29,7 +29,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Launch websocket terminal in ssh machines.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class SshMachineImplTerminalLauncher implements MachineImplSpecificTerminalLauncher {
     private static final Logger LOG = getLogger(SshMachineImplTerminalLauncher.class);
