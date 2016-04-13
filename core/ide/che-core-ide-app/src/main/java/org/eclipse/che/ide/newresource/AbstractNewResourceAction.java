@@ -119,7 +119,7 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
             throw new IllegalStateException("Invalid parent node.");
         }
 
-        projectServiceClient.createFile(appContext.getWorkspace().getId(),
+        projectServiceClient.createFile(appContext.getDevMachine(),
                                         ((HasStorablePath)parent).getStorablePath(),
                                         name,
                                         getDefaultContent(),

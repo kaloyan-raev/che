@@ -193,7 +193,7 @@ public class PullPresenter implements PullView.ActionDelegate {
                                   protected void onSuccess(PullResponse result) {
                                       GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
                                       console.print(result.getCommandOutput(), GREEN_COLOR);
-                                      consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                      consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                       notification.setStatus(SUCCESS);
                                       if (result.getCommandOutput().contains("Already up-to-date")) {
                                           notification.setTitle(constant.pullUpToDate());
@@ -274,7 +274,7 @@ public class PullPresenter implements PullView.ActionDelegate {
 
         GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(errorMessage, FAIL, true, project.getRootProject());
     }
 

@@ -127,7 +127,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                                            exception.getMessage() != null ? exception.getMessage() : constant.remoteListFailed();
                                    GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                                    console.printError(errorMessage);
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.remoteListFailed(), FAIL, true, project.getRootProject());
                                    view.setEnablePushButton(false);
                                }
@@ -162,7 +162,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.localBranchesListFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                 console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.localBranchesListFailed(), FAIL, true, project.getRootProject());
                 view.setEnablePushButton(false);
             }
@@ -212,7 +212,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                     public void onFailure(Throwable caught) {
                         GitOutputConsole console = gitOutputConsoleFactory.create(CONFIG_COMMAND_NAME);
                         console.printError(constant.failedGettingConfig());
-                        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                         notificationManager.notify(constant.failedGettingConfig(), FAIL, true, project.getRootProject());
                     }
                 });
@@ -223,7 +223,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.remoteBranchesListFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                 console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.remoteBranchesListFailed(), FAIL, true, project.getRootProject());
                 view.setEnablePushButton(false);
             }
@@ -301,7 +301,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                          @Override
                          protected void onSuccess(PushResponse result) {
                              console.print(result.getCommandOutput());
-                             consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                             consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                              notification.setStatus(SUCCESS);
                              if (result.getCommandOutput().contains("Everything up-to-date")) {
                                  notification.setTitle(constant.pushUpToDate());
@@ -313,7 +313,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                          @Override
                          protected void onFailure(Throwable exception) {
                              handleError(exception, notification, console);
-                             consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                             consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                          }
                      });
         view.close();

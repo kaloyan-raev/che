@@ -128,7 +128,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                @Override
                                protected void onFailure(Throwable exception) {
                                    console.printError(exception.getMessage());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.branchesListFailed(), FAIL, true, project);
                                }
                            });
@@ -151,7 +151,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                @Override
                                protected void onFailure(Throwable exception) {
                                    console.printError(exception.getMessage());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.branchesListFailed(), FAIL, true, project);
                                }
                            });
@@ -176,7 +176,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                           @Override
                           protected void onSuccess(final MergeResult result) {
                               console.print(formMergeMessage(result));
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               notificationManager.notify(formMergeMessage(result), appContext.getCurrentProject().getRootProject());
                               refreshProject(editorAgent.getOpenedEditors());
                           }
@@ -195,7 +195,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                   return;
                               }
                               console.printError(exception.getMessage());
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               notificationManager
                                       .notify(constant.mergeFailed(), FAIL, true, appContext.getCurrentProject().getRootProject());
                           }

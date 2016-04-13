@@ -89,7 +89,7 @@ public class DeleteRepositoryPresenter {
             @Override
             protected void onSuccess(Void result) {
                 console.print(constant.deleteGitRepositorySuccess());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.deleteGitRepositorySuccess(), project.getRootProject());
                 getRootProject(project.getRootProject());
             }
@@ -97,14 +97,14 @@ public class DeleteRepositoryPresenter {
             @Override
             protected void onFailure(Throwable exception) {
                 console.printError(exception.getMessage());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.failedToDeleteRepository(), FAIL, true, project.getRootProject());
             }
         });
     }
 
     private void getRootProject(final ProjectConfigDto config) {
-        projectService.getProject(workspaceId,
+        projectService.getProject(appContext.getDevMachine(),
                                   config.getPath(),
                                   new AsyncRequestCallback<ProjectConfigDto>(dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)) {
                                       @Override

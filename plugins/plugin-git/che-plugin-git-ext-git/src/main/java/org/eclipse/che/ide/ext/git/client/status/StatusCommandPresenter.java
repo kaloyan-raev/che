@@ -113,6 +113,6 @@ public class StatusCommandPresenter {
             console.print(line);
         }
 
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
     }
 }

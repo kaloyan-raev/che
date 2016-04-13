@@ -116,7 +116,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                                    addSelection();
                                } else {
                                    console.print(constant.nothingAddToIndex());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.nothingAddToIndex(), project.getRootProject());
                                }
                            }
@@ -124,7 +124,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                            @Override
                            protected void onFailure(Throwable exception) {
                                console.printError(exception.getMessage() != null ? exception.getMessage() : constant.statusFailed());
-                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                notificationManager.notify(constant.statusFailed(), FAIL, true, project.getRootProject());
                            }
                        });
@@ -182,7 +182,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                 protected void onSuccess(final Void result) {
 
                     console.print(constant.addSuccess());
-                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                     notificationManager.notify(constant.addSuccess(), project.getRootProject());
                 }
 
@@ -304,7 +304,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
     private void handleError(@NotNull final Throwable e, GitOutputConsole console) {
         String errorMessage = (e.getMessage() != null && !e.getMessage().isEmpty()) ? e.getMessage() : constant.addFailed();
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(constant.addFailed(), FAIL, true, project.getRootProject());
     }
 

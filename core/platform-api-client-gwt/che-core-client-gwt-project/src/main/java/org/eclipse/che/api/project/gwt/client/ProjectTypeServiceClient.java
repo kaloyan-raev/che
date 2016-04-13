@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.gwt.client;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.promises.client.Promise;
 
@@ -29,7 +30,7 @@ public interface ProjectTypeServiceClient {
      *         id of current workspace
      * @return a promise that will provide a list of {@link ProjectTypeDto}s, or rejects with an error
      */
-    Promise<List<ProjectTypeDto>> getProjectTypes(String workspaceId);
+    Promise<List<ProjectTypeDto>> getProjectTypes(DevMachine devMachine);
 
     /**
      * Get information about project type with the specified ID.

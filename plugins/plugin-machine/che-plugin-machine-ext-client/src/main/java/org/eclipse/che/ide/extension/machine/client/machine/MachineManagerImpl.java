@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.OutputMessageUnmarshaller;
@@ -82,7 +83,6 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     private final EventBus                eventBus;
 
     private MessageBus messageBus;
-    private Machine    devMachine;
     private boolean    isMachineRestarting;
 
     private String                                  wsAgentLogChannel;
@@ -136,7 +136,6 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), SUCCESS);
 
                         String machineId = event.getMachineId();
-                        appContext.setDevMachineId(machineId);
                         onMachineRunning(machineId);
 
                         eventBus.fireEvent(new DevMachineStateEvent(event));
@@ -279,10 +278,10 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
         machineServiceClient.getMachine(machineId).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machineDto) throws OperationException {
-                appContext.setDevMachineId(machineId);
+                DevMachine devMachine = new DevMachine(machineDto);
+                appContext.setDevMachine(devMachine);
                 appContext.setProjectsRoot(machineDto.getRuntime().projectsRoot());
-                devMachine = entityFactory.createMachine(machineDto);
-                wsAgentStateController.initialize(devMachine.getWsServerExtensionsUrl(), appContext.getWorkspaceId());
+                wsAgentStateController.initialize(devMachine);
             }
         });
     }
@@ -305,9 +304,9 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
             public void apply(Void arg) throws OperationException {
                 machineStatusNotifier.trackMachine(machineState, DESTROY);
 
-                final String devMachineId = appContext.getDevMachineId();
-                if (devMachineId != null && machineState.getId().equals(devMachineId)) {
-                    appContext.setDevMachineId(null);
+                final DevMachine devMachine = appContext.getDevMachine();
+                if (devMachine != null && machineState.getId().equals(devMachine.getId())) {
+                    appContext.setDevMachine(null);
                 }
             }
         });

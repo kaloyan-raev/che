@@ -199,7 +199,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                               (exception.getMessage() != null) ? exception.getMessage() : locale.branchesListFailed();
                                       GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                                       console.printError(errorMessage);
-                                      consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                      consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                       notificationManager.notify(locale.branchesListFailed(), FAIL, false);
                                   }
                               }

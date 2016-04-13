@@ -10,33 +10,42 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.gwt.client;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * @author Vitaly Parfonov
  */
 public class ProjectImportersServiceClientImpl implements ProjectImportersServiceClient {
 
-    private final String              extPath;
     private final AsyncRequestFactory asyncRequestFactory;
+    private String wsAgentBaseUrl;
 
     @Inject
-    public ProjectImportersServiceClientImpl(@Named("cheExtensionPath") String extPath,
+    public ProjectImportersServiceClientImpl(WsAgentStateController wsAgentStateController,
                                              AsyncRequestFactory asyncRequestFactory) {
-        this.extPath = extPath;
         this.asyncRequestFactory = asyncRequestFactory;
+        wsAgentStateController.getDevMachine().then(new Operation<DevMachine>() {
+            @Override
+            public void apply(DevMachine devMachine) throws OperationException {
+                wsAgentBaseUrl = devMachine.getWsAgentBaseUrl();
+            }
+        });
+
     }
 
     @Override
     public void getProjectImporters(String workspaceId, AsyncRequestCallback<ProjectImporterData> callback) {
-        asyncRequestFactory.createGetRequest(extPath + "/project-importers/" + workspaceId)
+        asyncRequestFactory.createGetRequest(wsAgentBaseUrl + "/project-importers/" + workspaceId)
                            .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                            .send(callback);
     }

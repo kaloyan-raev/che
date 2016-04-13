@@ -29,16 +29,16 @@ public class ExportPresenterTest extends BaseSubversionPresenterTest {
     private ExportPresenter presenter;
 
     @Mock
-    ExportView exportView;
-
+    ExportView         exportView;
     @Mock
-    DialogFactory dialogFactory;
+    DialogFactory      dialogFactory;
+
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        presenter = new ExportPresenter(null, appContext, subversionOutputConsoleFactory, consolesPanelPresenter, projectExplorerPart,
+        presenter = new ExportPresenter(appContext, subversionOutputConsoleFactory, consolesPanelPresenter, projectExplorerPart,
                                         exportView, dtoUnmarshallerFactory, service, notificationManager, constants);
     }
 

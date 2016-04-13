@@ -132,7 +132,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                                String errorMassage = exception.getMessage() != null ? exception.getMessage() : constant.statusFailed();
                                GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
                                console.printError(errorMassage);
-                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                notificationManager.notify(errorMassage, project.getRootProject());
                            }
                        });
@@ -151,7 +151,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         if (files.isEmpty()) {
             view.close();
             console.print(constant.nothingToReset());
-            consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+            consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
             notificationManager.notify(constant.nothingToReset(), project.getRootProject());
             return;
         }
@@ -161,7 +161,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
             @Override
             protected void onSuccess(Void result) {
                 console.print(constant.resetFilesSuccessfully());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.resetFilesSuccessfully(), project.getRootProject());
             }
 
@@ -169,7 +169,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
             protected void onFailure(Throwable exception) {
                 String errorMassage = exception.getMessage() != null ? exception.getMessage() : constant.resetFilesFailed();
                 console.printError(errorMassage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(errorMassage, project.getRootProject());
             }
         });

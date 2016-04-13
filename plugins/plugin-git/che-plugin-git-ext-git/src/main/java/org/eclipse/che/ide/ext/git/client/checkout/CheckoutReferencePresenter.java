@@ -118,7 +118,7 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
                                  //so we must repeat the logic which is performed when we open a project
                                  Unmarshallable<ProjectConfigDto> unmarshaller =
                                          dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
-                                 projectService.getProject(appContext.getWorkspace().getId(), project.getPath(),
+                                 projectService.getProject(appContext.getDevMachine(), project.getPath(),
                                                            new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
                                                                @Override
                                                                protected void onSuccess(final ProjectConfigDto result) {
@@ -145,7 +145,7 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
                                                              : constant.checkoutFailed();
                                  GitOutputConsole console = gitOutputConsoleFactory.create(CHECKOUT_COMMAND_NAME);
                                  console.printError(errorMessage);
-                                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                  notificationManager.notify(constant.checkoutFailed(), FAIL, true, project);
                              }
                          }

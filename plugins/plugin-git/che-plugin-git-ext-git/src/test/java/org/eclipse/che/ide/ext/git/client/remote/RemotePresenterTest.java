@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.googlecode.gwt.test.utils.GwtReflectionUtils;
 
 import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
@@ -163,7 +164,7 @@ public class RemotePresenterTest extends BaseTest {
                                    (AsyncRequestCallback<List<Remote>>)anyObject());
         verify(console, never()).printError(anyString());
         verify(notificationManager, never()).notify(anyString(), eq(rootProjectConfig));
-        verify(projectService).getProject(anyString(), anyString(), anyObject());
+        verify(projectService).getProject(mock(DevMachine.class), anyString(), anyObject());
         verify(eventBus).fireEvent(Matchers.<ProjectUpdatedEvent>anyObject());
     }
 
@@ -217,7 +218,7 @@ public class RemotePresenterTest extends BaseTest {
         verify(service).remoteDelete(anyString(), eq(rootProjectConfig), eq(REPOSITORY_NAME), (AsyncRequestCallback<String>)anyObject());
         verify(service, times(2)).remoteList(anyString(), anyObject(), anyString(), eq(SHOW_ALL_INFORMATION),
                                              (AsyncRequestCallback<List<Remote>>)anyObject());
-        verify(projectService).getProject(anyString(), anyString(), anyObject());
+        verify(projectService).getProject(mock(DevMachine.class), anyString(), anyObject());
         verify(eventBus).fireEvent(Matchers.<ProjectUpdatedEvent>anyObject());
     }
 

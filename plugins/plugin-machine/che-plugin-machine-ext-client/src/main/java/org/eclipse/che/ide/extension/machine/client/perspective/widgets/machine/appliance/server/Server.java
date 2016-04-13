@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-public class Server {
+public class Server implements org.eclipse.che.api.core.model.machine.Server {
 
     private final String    port;
     private final ServerDto descriptor;
@@ -41,6 +41,11 @@ public class Server {
     @NotNull
     public String getAddress() {
         return descriptor.getAddress();
+    }
+
+    @Override
+    public String getProtocol() {
+        return descriptor.getProtocol();
     }
 
     @NotNull

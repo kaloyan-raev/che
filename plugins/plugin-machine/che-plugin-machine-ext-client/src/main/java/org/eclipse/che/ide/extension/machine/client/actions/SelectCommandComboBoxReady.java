@@ -139,7 +139,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final String currentDevMachineId = appContext.getDevMachineId();
+        final String currentDevMachineId = appContext.getDevMachine().getId();
         if (currentDevMachineId == null) {
             return;
         }

@@ -91,7 +91,7 @@ public class ShowProjectGitReadOnlyUrlPresenter implements ShowProjectGitReadOnl
                                                                           : constant.remoteListFailed();
                                    GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                                    console.printError(errorMessage);
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.remoteListFailed(), FAIL, true, project.getRootProject());
                                }
                            }
@@ -110,7 +110,7 @@ public class ShowProjectGitReadOnlyUrlPresenter implements ShowProjectGitReadOnl
                                           final GitOutputConsole console = gitOutputConsoleFactory.create(READ_ONLY_URL_COMMAND_NAME);
                                           console.printError(errorMessage);
                                           consolesPanelPresenter
-                                                  .addCommandOutput(appContext.getDevMachineId(), console);
+                                                  .addCommandOutput(appContext.getDevMachine().getId(), console);
                                           notificationManager.notify(constant.initFailed(), FAIL, true, project.getRootProject());
                                       }
                                   });

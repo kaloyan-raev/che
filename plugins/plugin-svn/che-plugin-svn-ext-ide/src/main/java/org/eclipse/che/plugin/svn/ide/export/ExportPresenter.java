@@ -45,18 +45,17 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class ExportPresenter extends SubversionActionPresenter implements ExportView.ActionDelegate {
 
-    private       ExportView                               view;
+    private final AppContext appContext;
+    private ExportView view;
     private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private final SubversionClientService                  subversionClientService;
     private       NotificationManager                      notificationManager;
     private       SubversionExtensionLocalizationConstants constants;
-    private final String                                   baseHttpUrl;
 
     private HasStorablePath selectedNode;
 
     @Inject
-    public ExportPresenter(@Named("cheExtensionPath") String extPath,
-                           AppContext appContext,
+    public ExportPresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
                            ConsolesPanelPresenter consolesPanelPresenter,
                            ProjectExplorerPresenter projectExplorerPart,
@@ -66,6 +65,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
                            NotificationManager notificationManager,
                            SubversionExtensionLocalizationConstants constants) {
         super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+        this.appContext = appContext;
         this.view = view;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.subversionClientService = subversionClientService;
@@ -73,7 +73,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         this.constants = constants;
         this.view.setDelegate(this);
 
-        this.baseHttpUrl = extPath + "/svn/" + appContext.getWorkspaceId();
+
     }
 
     public void showExport(HasStorablePath selectedNode) {
@@ -164,8 +164,8 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
 
     private void openExportPopup(final String projectPath, final String exportPath, final String revision,
                                  final StatusNotification notification) {
-        final StringBuilder url = new StringBuilder(baseHttpUrl + "/export" + projectPath);
-
+        final StringBuilder url = new StringBuilder(appContext.getDevMachine().getWsAgentBaseUrl() + "/svn/"
+                                                    + appContext.getWorkspaceId() + "/export" + projectPath);
         char separator = '?';
         if (!".".equals(exportPath)) {
             url.append(separator).append("path").append('=').append(exportPath);

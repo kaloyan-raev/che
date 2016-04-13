@@ -146,7 +146,7 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
                 String errorMessage = caught.getMessage() != null ? caught.getMessage() : constant.remoteAddFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                 console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.remoteAddFailed(), FAIL, true, project);
             }
         });
@@ -175,7 +175,7 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
                 String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.remoteDeleteFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                 console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.remoteDeleteFailed(), FAIL, true, project);
             }
         });
@@ -193,12 +193,12 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
     private void handleError(@NotNull String errorMessage) {
         GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(errorMessage, project);
     }
 
     private void refreshProject() {
-        projectService.getProject(workspaceId, project.getName(), new AsyncRequestCallback<ProjectConfigDto>(
+        projectService.getProject(appContext.getDevMachine(), project.getName(), new AsyncRequestCallback<ProjectConfigDto>(
                 dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class)) {
             @Override
             protected void onSuccess(ProjectConfigDto result) {

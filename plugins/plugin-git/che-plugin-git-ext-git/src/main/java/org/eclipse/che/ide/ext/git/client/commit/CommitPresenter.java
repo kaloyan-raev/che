@@ -232,7 +232,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         }
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.print(message);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(message, appContext.getCurrentProject().getRootProject());
         view.setMessage("");
     }
@@ -258,7 +258,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         String errorMessage = (exceptionMessage != null && !exceptionMessage.isEmpty()) ? exceptionMessage : constant.commitFailed();
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, true, appContext.getCurrentProject().getRootProject());
     }
 

@@ -110,7 +110,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                             String errorMessage = (exception.getMessage() != null) ? exception.getMessage() : constant.logFailed();
                             GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
                             console.printError(errorMessage);
-                            consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                            consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                             notificationManager.notify(constant.logFailed(), FAIL, true, appContext.getCurrentProject().getRootProject());
                         }
                     }
@@ -167,7 +167,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                                   eventBus.fireEvent(new OpenProjectEvent(project));
                               }
                               console.print(constant.resetSuccessfully());
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               notificationManager.notify(constant.resetSuccessfully(), project);
 
                           }
@@ -176,7 +176,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                           protected void onFailure(Throwable exception) {
                               String errorMessage = (exception.getMessage() != null) ? exception.getMessage() : constant.resetFail();
                               console.printError(errorMessage);
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               notificationManager.notify(constant.resetFail(), FAIL, true, project);
                           }
                       });

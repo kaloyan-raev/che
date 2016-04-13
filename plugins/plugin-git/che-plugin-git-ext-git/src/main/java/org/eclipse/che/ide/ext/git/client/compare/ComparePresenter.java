@@ -138,7 +138,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             @Override
             public void accepted() {
                 final String path = appContext.getCurrentProject().getRootProject().getName() + "/" + item;
-                projectService.updateFile(workspaceId, path, newContent, new AsyncRequestCallback<Void>() {
+                projectService.updateFile(appContext.getDevMachine(), path, newContent, new AsyncRequestCallback<Void>() {
                     @Override
                     protected void onSuccess(Void result) {
                         eventBus.fireEvent(new FileContentUpdateEvent("/" + path));
@@ -167,7 +167,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     private void showCompare(final String file, final String oldContent, final String revision) {
         String fullItemPath = appContext.getCurrentProject().getRootProject().getName() + "/" + file;
 
-        projectService.getFileContent(appContext.getWorkspace().getId(),
+        projectService.getFileContent(appContext.getDevMachine(),
                                       fullItemPath,
                                       new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                                           @Override

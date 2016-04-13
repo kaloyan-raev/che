@@ -463,10 +463,10 @@ public class CoreGinModule extends AbstractGinModule {
         return partAgentPresenter.getPartStackHandler();
     }
 
+    @Named("ws.agent.path")
     @Provides
-    @Named("cheExtensionPath")
     @Singleton
-    protected String getJavaCAPath() {
-        return Config.getCheExtensionPath();
+    public String wsAgentPath() {
+        return Config.getWsAgentPath();
     }
 }

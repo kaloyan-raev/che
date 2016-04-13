@@ -231,7 +231,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
                 getBranches();
                 //In this case we can have unconfigured state of the project,
                 //so we must repeat the logic which is performed when we open a project
-                projectService.getProject(workspaceId, path,
+                projectService.getProject(appContext.getDevMachine(), path,
                                           new AsyncRequestCallback<ProjectConfigDto>(
                                                   dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class)) {
                                               @Override
@@ -256,7 +256,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
     }
 
     private void updateProject(final ProjectConfigDto projectToUpdate) {
-        Promise<ProjectConfigDto> updateProjectPromise = projectService.updateProject(workspaceId, projectToUpdate.getPath(), projectToUpdate);
+        Promise<ProjectConfigDto> updateProjectPromise = projectService.updateProject(appContext.getDevMachine(), projectToUpdate.getPath(), projectToUpdate);
         updateProjectPromise.then(new Operation<ProjectConfigDto>() {
             @Override
             public void apply(ProjectConfigDto arg) throws OperationException {
@@ -277,7 +277,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
             final String filePath = file.getPath();
             Unmarshallable<ItemReference> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ItemReference.class);
 
-            projectService.getItem(workspaceId, filePath,
+            projectService.getItem(appContext.getDevMachine(), filePath,
                                    new AsyncRequestCallback<org.eclipse.che.api.project.shared.dto.ItemReference>(unmarshaller) {
                                        @Override
                                        protected void onSuccess(ItemReference itemReference) {
@@ -400,7 +400,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
         GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
         printGitMessage(errorMessage, console);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(errorMessage, FAIL, true, project.getRootProject());
     }
 

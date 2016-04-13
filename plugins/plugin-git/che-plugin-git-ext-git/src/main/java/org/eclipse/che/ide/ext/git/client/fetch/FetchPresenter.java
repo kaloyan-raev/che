@@ -118,7 +118,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                                protected void onFailure(Throwable exception) {
                                    GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                                    console.printError(constant.remoteListFailed());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.remoteListFailed(), FAIL, true, project.getRootProject());
                                    view.setEnableFetchButton(false);
                                }
@@ -156,7 +156,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                                            exception.getMessage() != null ? exception.getMessage() : constant.branchesListFailed();
                                    GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                                    console.printError(errorMessage);
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.branchesListFailed(), FAIL, true, project.getRootProject());
                                    view.setEnableFetchButton(false);
                                }
@@ -179,7 +179,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                               @Override
                               protected void onSuccess(String result) {
                                   console.print(constant.fetchSuccess(remoteUrl));
-                                  consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                  consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                   notification.setStatus(SUCCESS);
                                   notification.setTitle(constant.fetchSuccess(remoteUrl));
                               }
@@ -187,13 +187,13 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                               @Override
                               protected void onFailure(Throwable exception) {
                                   handleError(exception, remoteUrl, notification, console);
-                                  consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                  consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               }
                           }
                          );
         } catch (WebSocketException e) {
             handleError(e, remoteUrl, notification, console);
-            consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+            consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         }
         view.close();
     }

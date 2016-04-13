@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.git.client.branch;
 
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -380,7 +381,7 @@ public class BranchPresenterTest extends BaseTest {
         verify(notificationManager, never()).notify(anyString(), eq(rootProjectConfig));
         verify(eventBus).fireEvent(Matchers.<FileContentUpdateEvent>anyObject());
         verify(constant, never()).branchCheckoutFailed();
-        verify(projectService).getProject(anyString(), anyString(), anyObject());
+        verify(projectService).getProject(mock(DevMachine.class), anyString(), anyObject());
         verify(eventBus).fireEvent(Matchers.<ProjectUpdatedEvent>anyObject());
     }
 

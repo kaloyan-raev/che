@@ -181,7 +181,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
                                 String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.logFailed();
                                 GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
                                 console.printError(errorMessage);
-                                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                 notificationManager.notify(constant.logFailed(), FAIL, true, project);
                             }
                             partStack.hidePart(HistoryPresenter.this);
@@ -382,7 +382,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
                              String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.diffFailed();
                              GitOutputConsole console = gitOutputConsoleFactory.create(DIFF_COMMAND_NAME);
                              console.printError(errorMessage);
-                             consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                             consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                              notificationManager.notify(constant.diffFailed(), FAIL, true, project);
                          }
                      });
@@ -422,7 +422,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
                                  String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.diffFailed();
                                  GitOutputConsole console = gitOutputConsoleFactory.create(DIFF_COMMAND_NAME);
                                  console.printError(errorMessage);
-                                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                  notificationManager.notify(constant.diffFailed(), FAIL, true, project);
                              }
                          });
