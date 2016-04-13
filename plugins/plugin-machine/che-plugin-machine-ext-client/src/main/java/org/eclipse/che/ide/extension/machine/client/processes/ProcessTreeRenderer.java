@@ -46,7 +46,6 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     public static final Map<String, String> LABELS_BY_TYPE_MAP = new HashMap<String, String>() {
         {
-            put("persistent", "ssh");
             put("docker", "dkr");
         }
     };

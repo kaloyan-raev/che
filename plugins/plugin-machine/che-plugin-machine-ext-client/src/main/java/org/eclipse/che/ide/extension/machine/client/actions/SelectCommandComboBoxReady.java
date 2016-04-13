@@ -75,11 +75,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
 
     public static final String              GROUP_COMMANDS                 = "CommandsGroup";
     public static final String              GROUP_MACHINES                 = "MachinesGroup";
-    public static final Map<String, String> MACHINE_CATEGORIES_BY_TYPE_MAP = new HashMap<String, String>() {
-        {
-            put("persistent", "ssh");
-        }
-    };
+
     private final MachineLocalizationConstant locale;
     private final MachineResources            resources;
     private final Map<String, MachineDto>     registeredMachineMap;
@@ -400,8 +396,9 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
         for (Map.Entry<String, MachineDto> machineEntry : machineEntryList) {
             final MachineDto machine = machineEntry.getValue();
             final MachineConfigDto machineConfig = machine.getConfig();
+
             if (!this.getMachineCategory(machineConfig).equals(machineCategory)) {
-                machineCategory = getMachineCategory(machineConfig);
+                machineCategory = this.getMachineCategory(machineConfig);
                 machinesActions.addSeparator(machineCategory);
             }
             machinesActions.add(machinesListWidget.createAction(machine.getId(), machineConfig.getName()));
@@ -422,9 +419,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
         if (machineConfig.isDev()) {
             return this.locale.selectMachineDevCategory();
         }
-        final String machineType = machineConfig.getType();
-
-        return MACHINE_CATEGORIES_BY_TYPE_MAP.containsKey(machineType) ? MACHINE_CATEGORIES_BY_TYPE_MAP.get(machineType) : machineType;
+        return  machineConfig.getType();
     }
 
     private class MachineDtoListEntryComparator implements Comparator<Map.Entry<String, MachineDto>> {
