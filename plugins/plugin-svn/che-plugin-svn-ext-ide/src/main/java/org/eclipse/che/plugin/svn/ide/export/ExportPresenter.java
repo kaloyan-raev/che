@@ -25,6 +25,7 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
@@ -46,11 +47,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 public class ExportPresenter extends SubversionActionPresenter implements ExportView.ActionDelegate {
 
     private final AppContext appContext;
-    private ExportView view;
+    private final ExportView view;
     private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private final SubversionClientService                  subversionClientService;
-    private       NotificationManager                      notificationManager;
-    private       SubversionExtensionLocalizationConstants constants;
+    private final NotificationManager                      notificationManager;
+    private final SubversionExtensionLocalizationConstants constants;
 
     private HasStorablePath selectedNode;
 
@@ -63,8 +64,9 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
                            DtoUnmarshallerFactory dtoUnmarshallerFactory,
                            SubversionClientService subversionClientService,
                            NotificationManager notificationManager,
-                           SubversionExtensionLocalizationConstants constants) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                           SubversionExtensionLocalizationConstants constants,
+                           final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
         this.appContext = appContext;
         this.view = view;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
