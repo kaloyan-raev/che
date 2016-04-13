@@ -21,6 +21,8 @@ public class Target {
 
     private String name;
 
+    private String architecture;
+
     private String host;
 
     private String port;
@@ -75,6 +77,14 @@ public class Target {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 
     public String getHost() {

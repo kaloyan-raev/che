@@ -77,6 +77,22 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
     String getTargetName();
 
     /**
+     * Sets target architecture.
+     *
+     * @param architecture
+     *          target architecture
+     */
+    void setArchitecture(String architecture);
+
+    /**
+     * Returns target architecture.
+     * 
+     * @return
+     *          target architecture
+     */
+    String getArchitecture();
+
+    /**
      * Sets SSH host value.
      *
      * @param host
@@ -170,8 +186,6 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
      */
     void setConnectButtonText(String text);
 
-    void setConnectionStatusText(String text);
-
     /**
      * Focuses and selects all the text in the Name field.
      */
@@ -192,6 +206,8 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
         void onTargetSelected(Target target);
 
         void onTargetNameChanged(String value);
+
+        void onArchitectureChanged(String value);
 
         void onHostChanged(String value);
 

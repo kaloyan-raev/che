@@ -224,7 +224,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     /** Start new SSH machine. */
     @Override
     public void startSSHMachine(String recipeURL, String displayName) {
-        startMachine(recipeURL, displayName, false, START, "ssh-config", "persistent");
+        startMachine(recipeURL, displayName, false, START, "ssh-config", "ssh");
     }
 
     /** Start new machine as dev-machine (bind workspace to running machine). */
@@ -241,7 +241,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
      * @param sourceType
      *          "dockerfile" or "ssh-config"
      * @param machineType
-     *          "docker" or "persistent"
+     *          "docker" or "ssh"
      */
     private void startMachine(final String recipeURL,
                               final String displayName,

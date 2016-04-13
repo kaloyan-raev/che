@@ -15,6 +15,8 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -27,7 +29,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -44,6 +45,7 @@ import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
+import org.eclipse.che.ide.ui.listbox.CustomListBox;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 import org.eclipse.che.ide.ui.window.Window;
@@ -92,6 +94,9 @@ public class TargetsViewImpl extends Window implements TargetsView {
     TextBox                         targetName;
 
     @UiField
+    CustomListBox                   architectureListBox;
+
+    @UiField
     TextBox                         host;
 
     @UiField
@@ -105,9 +110,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
 
     @UiField
     FlowPanel                       operationPanel;
-
-    @UiField
-    Label                           operationLabel;
 
     @UiField
     FlowPanel                       footer;
@@ -150,6 +152,17 @@ public class TargetsViewImpl extends Window implements TargetsView {
         }, KeyDownEvent.getType());
         targetsPanel.add(list);
 
+        architectureListBox.addItem("linux_amd64");
+        architectureListBox.addItem("linux_arm7");
+        architectureListBox.setSelectedIndex(0);
+
+        architectureListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent changeEvent) {
+                delegate.onArchitectureChanged(architectureListBox.getValue());
+            }
+        });
+
         closeButton = createButton(coreLocale.close(), "targets.button.close",
                 new ClickHandler() {
                     @Override
@@ -187,7 +200,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
 
         operationPanel.add(connectButton);
         operationPanel.getElement().insertFirst(connectButton.getElement());
-
 
         targetName.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -416,6 +428,21 @@ public class TargetsViewImpl extends Window implements TargetsView {
     }
 
     @Override
+    public void setArchitecture(String architecture) {
+        for (int i = 0; i < architectureListBox.getItemCount(); i++) {
+            if (architecture.equals(architectureListBox.getItemText(i))) {
+                architectureListBox.setSelectedIndex(i);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public String getArchitecture() {
+        return architectureListBox.getValue();
+    }
+
+    @Override
     public void setHost(String host) {
         this.host.setValue(host);
     }
@@ -484,11 +511,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
     public void selectTargetName() {
         targetName.setFocus(true);
         targetName.selectAll();
-    }
-
-    @Override
-    public void setConnectionStatusText(String text) {
-        operationLabel.setText(text);
     }
 
 }

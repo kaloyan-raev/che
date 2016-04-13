@@ -163,7 +163,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     private boolean isMachineRunning(String machineName) {
         for (MachineDto machine : machines) {
             if (machine.getConfig().getName().equals(machineName) &&
-                    "persistent".equals(machine.getConfig().getType()) &&
+                    "ssh".equals(machine.getConfig().getType()) &&
                     machine.getStatus() == MachineStatus.RUNNING) {
                 return true;
             }
@@ -182,15 +182,30 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         try {
             JSONObject json = JSONParser.parseStrict(target.getRecipe().getScript()).isObject();
 
-            String host = json.get("host").isString().stringValue();
-            String port = json.get("port").isString().stringValue();
-            String username = json.get("username").isString().stringValue();
-            String password = json.get("password").isString().stringValue();
+            if (json.get("architecture") != null) {
+                String architecture = json.get("architecture").isString().stringValue();
+                target.setArchitecture(architecture);
+            }
 
-            target.setHost(host);
-            target.setPort(port);
-            target.setUserName(username);
-            target.setPassword(password);
+            if (json.get("host") != null) {
+                String host = json.get("host").isString().stringValue();
+                target.setHost(host);
+            }
+
+            if (json.get("port") != null) {
+                String port = json.get("port").isString().stringValue();
+                target.setPort(port);
+            }
+
+            if (json.get("username") != null) {
+                String username = json.get("username").isString().stringValue();
+                target.setUserName(username);
+            }
+
+            if (json.get("password") != null) {
+                String password = json.get("password").isString().stringValue();
+                target.setPassword(password);
+            }
 
         } catch (Exception e) {
             Log.error(TargetsPresenter.class, "Unable to parse recipe JSON. " + e.getMessage());
@@ -205,6 +220,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     @Override
     public void onAddTarget(String category) {
         Target target = new Target("[new target]", "ssh");
+        target.setArchitecture("linux_amd64");
         target.setHost("127.0.0.1");
         target.setPort("22");
         target.setUserName("root");
@@ -230,6 +246,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         } else if ("ssh".equalsIgnoreCase(target.getType())) {
             view.showPropertiesPanel();
             view.setTargetName(target.getName());
+            view.setArchitecture(target.getArchitecture());
 
             view.setHost(target.getHost());
             view.setPort(target.getPort());
@@ -252,6 +269,17 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         }
 
         selectedTarget.setName(value);
+        selectedTarget.setDirty(true);
+        updateButtons();
+    }
+
+    @Override
+    public void onArchitectureChanged(String value) {
+        if (selectedTarget.getArchitecture().equals(value)) {
+            return;
+        }
+
+        selectedTarget.setArchitecture(value);
         selectedTarget.setDirty(true);
         updateButtons();
     }
@@ -351,11 +379,13 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         NewRecipe newRecipe = dtoFactory.createDto(NewRecipe.class)
                 .withName(selectedTarget.getName())
                 .withType("ssh")
-                .withScript("{\"" +
-                        "host\": \"" + selectedTarget.getHost() + "\", " +
+                .withScript("{" +
+                        "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
+                        "\"host\": \"" + selectedTarget.getHost() + "\", " +
                         "\"port\": \"" + selectedTarget.getPort() + "\", " +
                         "\"username\": \"" + selectedTarget.getUserName() + "\", " +
-                        "\"password\": \"" + selectedTarget.getPassword() + "\"}")
+                        "\"password\": \"" + selectedTarget.getPassword() + "\"" +
+                        "}")
                 .withTags(tags);
 
         Promise<RecipeDescriptor> createRecipe = recipeServiceClient.createRecipe(newRecipe);
@@ -386,11 +416,13 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 .withTags(selectedTarget.getRecipe().getTags())
                 .withDescription(selectedTarget.getRecipe().getDescription())
                 .withPermissions(selectedTarget.getRecipe().getPermissions())
-                .withScript("{\"" +
-                        "host\": \"" + selectedTarget.getHost() + "\", " +
+                .withScript("{" +
+                        "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
+                        "\"host\": \"" + selectedTarget.getHost() + "\", " +
                         "\"port\": \"" + selectedTarget.getPort() + "\", " +
                         "\"username\": \"" + selectedTarget.getUserName() + "\", " +
-                        "\"password\": \"" + selectedTarget.getPassword() + "\"}");
+                        "\"password\": \"" + selectedTarget.getPassword() + "\"" +
+                        "}");
 
         Promise<RecipeDescriptor> updateRecipe = recipeServiceClient.updateRecipe(recipeUpdate);
         updateRecipe.then(new Operation<RecipeDescriptor>() {
@@ -475,7 +507,8 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 .withName(selectedTarget.getName())
                 .withSource(sourceDto)
                 .withLimits(limitsDto)
-                .withType("persistent");
+                .withType("ssh")
+                .withArchitecture(selectedTarget.getArchitecture());
 
         Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
 
@@ -548,7 +581,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         String machineId = null;
         for (MachineDto machine : machines) {
             if (machine.getConfig().getName().equals(selectedTarget.getName()) &&
-                    "persistent".equals(machine.getConfig().getType()) &&
+                    "ssh".equals(machine.getConfig().getType()) &&
                     machine.getStatus() == MachineStatus.RUNNING) {
                 machineId = machine.getId();
                 break;
@@ -599,7 +632,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         String machineId = null;
         for (MachineDto machine : machines) {
             if (machine.getConfig().getName().equals(target.getName()) &&
-                    "persistent".equals(machine.getConfig().getType()) &&
+                    "ssh".equals(machine.getConfig().getType()) &&
                     machine.getStatus() == MachineStatus.RUNNING) {
                 machineId = machine.getId();
                 break;
