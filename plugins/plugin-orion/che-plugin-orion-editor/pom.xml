@@ -100,33 +100,33 @@
             </resource>
         </resources>
         <plugins>
-            <!--<plugin>-->
-            <!--&lt;!&ndash; Apply patches &ndash;&gt;-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-patch-plugin</artifactId>-->
-            <!--<version>1.1.1</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>bugfix-patches</id>-->
-            <!--<phase>compile</phase>-->
-            <!--<goals>-->
-            <!--<goal>apply</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<patchDirectory>${patches.location}</patchDirectory>-->
-            <!--<patches>-->
-            <!--<patch>built-codeEdit-amd.js.diff</patch>-->
-            <!--<patch>Bug482536.diff</patch>-->
-            <!--<patch>embeddedToolingPlugin.js.diff</patch>-->
-            <!--</patches>-->
-            <!--<optimizations>false</optimizations>-->
-            <!--<strictPatching>true</strictPatching>-->
-            <!--<strip>1</strip>-->
-            <!--<targetDirectory>${project.build.directory}/classes</targetDirectory>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
+            <plugin>
+                <!-- Apply patches -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-patch-plugin</artifactId>
+                <version>1.1.1</version>
+                <executions>
+                    <execution>
+                        <id>bugfix-patches</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <configuration>
+                            <patchDirectory>${patches.location}</patchDirectory>
+                            <patches>
+                                <patch>built-codeEdit-amd.js.diff</patch>
+                                <patch>Bug482536.diff</patch>
+                                <patch>embeddedToolingPlugin.js.diff</patch>
+                            </patches>
+                            <optimizations>false</optimizations>
+                            <strictPatching>true</strictPatching>
+                            <strip>1</strip>
+                            <targetDirectory>${project.build.directory}/classes</targetDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
