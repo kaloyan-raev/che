@@ -68,9 +68,7 @@ public class WsMasterModule extends AbstractModule {
 
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
-                      .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
-                          "sudo chown -R $(id -u -n) /projects && " +
-                          "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+                .to(":"); // no-op
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
                 .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
 
