@@ -44,5 +44,6 @@
         <module>plugin-cpp</module>
         <module>plugin-nodejs</module>
         <module>plugin-ssh-machine</module>
+        <module>plugin-localhost-machine</module>
     </modules>
 </project>
