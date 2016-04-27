@@ -401,48 +401,48 @@ get_docker_ready () {
   ### End logic block to create / remove / start docker-machine VM
 
   # Test to ensure user is in Docker group with appropriate permissions
-  if [ "${LINUX}" == "true" ]; then
-
-    LINUX_USER=$(whoami)
-    LINUX_GROUPS=$(groups "${LINUX_USER}")
-    LINUX_UID=$(id -u "${LINUX_USER}")
-
-    if [[ "${SKIP_DOCKER_UID}" == "false" ]] ; then
-      if echo "${LINUX_GROUPS}" | grep "docker" &>/dev/null; then
-
-        if [[ "${LINUX_UID}" != "1000" ]] ; then
-          error_exit "This Linux user was launched with a UID != 1000. Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
-        fi
-
-      else
-        error_exit "This Linux user is not in docker group. See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
-      fi
-    fi
-
-  fi
+#  if [ "${LINUX}" == "true" ]; then
+#
+#    LINUX_USER=$(whoami)
+#    LINUX_GROUPS=$(groups "${LINUX_USER}")
+#    LINUX_UID=$(id -u "${LINUX_USER}")
+#
+#    if [[ "${SKIP_DOCKER_UID}" == "false" ]] ; then
+#      if echo "${LINUX_GROUPS}" | grep "docker" &>/dev/null; then
+#
+#        if [[ "${LINUX_UID}" != "1000" ]] ; then
+#          error_exit "This Linux user was launched with a UID != 1000. Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
+#        fi
+#
+#      else
+#        error_exit "This Linux user is not in docker group. See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
+#      fi
+#    fi
+#
+#  fi
 
   # Docker should be available, either in a VM or natively.
   # Test to see if docker binary is installed
-  if [ ! -f "${DOCKER}" ]; then
-    error_exit "Could not find Docker client. Expected at Windows: %DOCKER_TOOLBOX_INSTALL_PATH%\\docker.exe, Mac: /usr/local/bin/docker, Linux: /usr/bin/docker."
-    return
-  fi
+#  if [ ! -f "${DOCKER}" ]; then
+#    error_exit "Could not find Docker client. Expected at Windows: %DOCKER_TOOLBOX_INSTALL_PATH%\\docker.exe, Mac: /usr/local/bin/docker, Linux: /usr/bin/docker."
+#    return
+#  fi
 
   # Test to see that docker command works
   "${DOCKER}" &> /dev/null || DOCKER_EXISTS=$? || true
 
-  if [ "${DOCKER_EXISTS}" == "1" ]; then
-    error_exit "We found the 'docker' binary, but running 'docker' failed. Is a docker symlink broken?"
-    return
-  fi
+#  if [ "${DOCKER_EXISTS}" == "1" ]; then
+#    error_exit "We found the 'docker' binary, but running 'docker' failed. Is a docker symlink broken?"
+#    return
+#  fi
 
   # Test to verify that docker can reach the VM
   "${DOCKER}" ps &> /dev/null || DOCKER_VM_REACHABLE=$? || true
 
-  if [ "${DOCKER_VM_REACHABLE}" == "1" ]; then
-    error_exit "Running 'docker' succeeded, but 'docker ps' failed. This usually means that docker cannot reach its daemon."
-    return
-  fi
+#  if [ "${DOCKER_VM_REACHABLE}" == "1" ]; then
+#    error_exit "Running 'docker' succeeded, but 'docker ps' failed. This usually means that docker cannot reach its daemon."
+#    return
+#  fi
 
   if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
     echo -e "${BLUE}Docker${NC} is configured to use docker-machine named ${GREEN}${VM}${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip ${VM})${NC}..."
