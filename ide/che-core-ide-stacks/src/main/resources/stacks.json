@@ -695,6 +695,102 @@
     }
   },
   {
+    "id": "zend",
+    "creator": "ide",
+    "name": "Zend",
+    "description": "Zend Server with PHP 7, Z-Ray, Composer, Git, etc.",
+    "scope": "general",
+    "tags": [
+      "PHP",
+      "Zend Server",
+      "Z-Ray",
+      "Composer",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "7.0.6"
+      },
+      {
+        "name": "Zend Server",
+        "version": "9.0.0"
+      },
+      {
+        "name": "Composer",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "kaloyanraev/che-zendserver"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "start zend server",
+          "type": "custom",
+          "commandLine": "sudo /usr/local/zend/bin/zendctl.sh start",
+          "attributes": {
+            "previewUrl": "http://${server.port.80}"
+          }
+        },
+        {
+          "name": "stop zend server",
+          "type": "custom",
+          "commandLine": "sudo /usr/local/zend/bin/zendctl.sh start stop",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "restart zend server",
+          "type": "custom",
+          "commandLine": "sudo /usr/local/zend/bin/zendctl.sh start restart",
+          "attributes": {
+            "previewUrl": "http://${server.port.80}"
+          }
+        }
+      ]
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-zend.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "python-default",
     "creator": "ide",
     "name": "Python",
