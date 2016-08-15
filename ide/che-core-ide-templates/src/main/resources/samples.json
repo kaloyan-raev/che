@@ -659,6 +659,40 @@
     ]
   },
   {
+    "name": "web-php-astro-splash",
+    "displayName": "astro-splash",
+    "path": "/web-php-simple",
+    "description": "A sample application based on Zend Expressive.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/AndrewCarterUK/AstroSplash.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "update images",
+        "type": "custom",
+        "commandLine": "php ${current.project.path}/bin/update.php"
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "php",
+      "zend",
+      "zend expressive"
+    ]
+  },
+  {
     "name": "web-php-gae-simple",
     "displayName": "web-php-gae-simple",
     "path": "/web-php-gae-simple",
