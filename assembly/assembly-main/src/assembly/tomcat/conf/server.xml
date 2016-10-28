@@ -139,6 +139,9 @@
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="false">
 
+        <!-- Serve zipped sample projects -->
+        <Context docBase="../../templates/zip" path="/samples" />
+
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->
         <!--
