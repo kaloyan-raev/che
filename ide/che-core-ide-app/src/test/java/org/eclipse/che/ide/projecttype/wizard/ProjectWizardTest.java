@@ -18,6 +18,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
@@ -59,6 +60,8 @@ public class ProjectWizardTest {
     @Mock
     private AppContext                   appContext;
     @Mock
+    private CommandManager               commandManager;
+    @Mock
     private Container                    workspaceRoot;
     @Mock
     private Project.ProjectRequest       createProjectRequest;
@@ -90,7 +93,9 @@ public class ProjectWizardTest {
     @Before
     public void setUp() {
         when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+        when(appContext.getProjectsRoot()).thenReturn(Path.valueOf("/projects"));
         when(dataObject.getPath()).thenReturn(Path.valueOf(PROJECT_NAME).toString());
+        when(createdProject.getPath()).thenReturn(PROJECT_NAME);
     }
 
     @Test
@@ -112,7 +117,7 @@ public class ProjectWizardTest {
     }
 
     private void prepareWizard(ProjectWizardMode mode) {
-        wizard = new ProjectWizard(dataObject, mode, appContext);
+        wizard = new ProjectWizard(dataObject, mode, appContext, commandManager);
     }
 
     @Test
