@@ -32,21 +32,21 @@
         <module>plugin-machine</module>
         <module>plugin-debugger</module>
         <module>plugin-java</module>
-        <module>plugin-java-debugger</module>
+        <!--module>plugin-java-debugger</module>
         <module>plugin-maven</module>
-        <module>plugin-gdb</module>
+        <module>plugin-gdb</module-->
         <module>plugin-sdk</module>
         <module>plugin-orion</module>
         <module>plugin-git</module>
         <module>plugin-github</module>
         <module>plugin-dashboard</module>
         <module>plugin-gwt</module>
-        <module>plugin-python</module>
+        <!-- module>plugin-python</module-->
         <module>plugin-svn</module>
-        <module>plugin-cpp</module>
+        <!-- module>plugin-cpp</module>
         <module>plugin-csharp</module>
         <module>plugin-nodejs</module>
-        <module>plugin-nodejs-debugger</module>
+        <module>plugin-nodejs-debugger</module-->
         <module>plugin-php</module>
         <module>plugin-ssh-machine</module>
         <module>plugin-ssh-key</module>

@@ -74,12 +74,12 @@
             <type>tar.gz</type>
             <classifier>linux_arm7</classifier>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-tools</artifactId>
             <type>jar</type>
             <classifier>jar-with-dependencies</classifier>
-        </dependency>
+        </dependency-->
     </dependencies>
     <build>
         <plugins>

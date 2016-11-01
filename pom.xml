@@ -29,7 +29,7 @@
         <module>wsagent</module>
         <module>ide</module>
         <module>plugins</module>
-        <module>samples</module>
+        <!-- module>samples</module-->
         <module>dashboard</module>
         <module>assembly</module>
     </modules>
@@ -416,7 +416,7 @@
                 <artifactId>che-plugin-composer-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-cpp-lang-ide</artifactId>
                 <version>${che.version}</version>
@@ -445,7 +445,7 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-csharp-lang-shared</artifactId>
                 <version>${che.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-debugger-ide</artifactId>
@@ -466,7 +466,7 @@
                 <artifactId>che-plugin-ext-dashboard-client</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-gdb-ide</artifactId>
                 <version>${che.version}</version>
@@ -475,7 +475,7 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-gdb-server</artifactId>
                 <version>${che.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-git-ext-git</artifactId>
@@ -516,7 +516,7 @@
                 <artifactId>che-plugin-help-ext-client</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-debugger-ide</artifactId>
                 <version>${che.version}</version>
@@ -525,7 +525,7 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-debugger-server</artifactId>
                 <version>${che.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-ext-lang-client</artifactId>
@@ -586,7 +586,7 @@
                 <artifactId>che-plugin-machine-ssh-client</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-maven-generator-archetype</artifactId>
                 <version>${che.version}</version>
@@ -630,7 +630,7 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-nodejs-lang-shared</artifactId>
                 <version>${che.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-orion-compare</artifactId>
@@ -671,7 +671,7 @@
                 <artifactId>che-plugin-product-info</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-python-lang-ide</artifactId>
                 <version>${che.version}</version>
@@ -685,7 +685,7 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-python-lang-shared</artifactId>
                 <version>${che.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-sdk-env-local</artifactId>
@@ -696,7 +696,7 @@
                 <artifactId>che-plugin-sdk-ext-plugins</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-sdk-tools</artifactId>
                 <version>${che.version}</version>
@@ -706,7 +706,7 @@
                 <artifactId>che-plugin-sdk-tools</artifactId>
                 <version>${che.version}</version>
                 <classifier>jar-with-dependencies</classifier>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ssh-key-ide</artifactId>
@@ -742,7 +742,7 @@
                 <artifactId>che-plugin-web-ext-web</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>maven-server-api</artifactId>
                 <version>${che.version}</version>
@@ -751,7 +751,7 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>maven-server-impl</artifactId>
                 <version>${che.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.core.filebuffers</artifactId>
@@ -797,7 +797,7 @@
                 <artifactId>org.eclipse.ui.ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>shared</artifactId>
                 <version>${che.version}</version>
@@ -866,7 +866,7 @@
                 <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-wizard-shared</artifactId>
                 <version>${che.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-test</artifactId>

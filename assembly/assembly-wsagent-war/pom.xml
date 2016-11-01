@@ -110,7 +110,7 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-composer-shared</artifactId>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-cpp-lang-server</artifactId>
         </dependency>
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-gdb-server</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-provider-github</artifactId>
@@ -144,10 +144,10 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-shared</artifactId>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-debugger-server</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-server</artifactId>
@@ -164,7 +164,7 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-json-server</artifactId>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-maven-generator-archetype</artifactId>
         </dependency>
@@ -183,7 +183,7 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-nodejs-lang-shared</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-php-lang-server</artifactId>
@@ -196,14 +196,14 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-zend-debugger-server</artifactId>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-python-lang-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-python-lang-shared</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-ssh-key-server</artifactId>
