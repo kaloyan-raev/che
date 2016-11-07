@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server;
 
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.*;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_READY;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SESSION_STARTED;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SRIPT_ENDED;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_START_PROCESS_FILE;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.REQUEST_GET_LOCAL_FILE_CONTENT;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +78,7 @@ import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgConnectionUtils;
-import org.eclipse.che.plugin.zdb.server.utils.ZendDbgUtils;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
 import org.eclipse.che.plugin.zdb.server.variables.IDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariables;
@@ -89,6 +94,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     private static final class VariablesStorage {
 
+        private static final String GLOBALS_VARIABLE = "$GLOBALS";
+
         private final List<IDbgVariable> variables;
 
         public VariablesStorage(List<IDbgVariable> variables) {
@@ -102,11 +109,15 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         IDbgVariable findVariable(VariablePath variablePath) {
             List<IDbgVariable> currentVariables = variables;
             IDbgVariable matchingVariable = null;
-            for (String variableName : variablePath.getPath()) {
+            Iterator<String> pathIterator = variablePath.getPath().iterator();
+            while (pathIterator.hasNext()) {
+                String variableName = pathIterator.next();
                 for (IDbgVariable currentVariable : currentVariables) {
                     if (currentVariable.getName().equals(variableName)) {
                         matchingVariable = currentVariable;
-                        currentVariables = new ArrayList<>(currentVariable.getVariables());
+                        if (pathIterator.hasNext()) {
+                            currentVariables = new ArrayList<>(currentVariable.getVariables());
+                        }
                         break;
                     }
                 }
@@ -199,7 +210,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     @Override
     public SimpleValue getValue(VariablePath variablePath) {
-        Variable matchingVariable = debugVariableStorage.findVariable(variablePath);
+        IDbgVariable matchingVariable = debugVariableStorage.findVariable(variablePath);
+        matchingVariable.makeComplete();
         return new SimpleValueImpl(matchingVariable.getVariables(), matchingVariable.getValue());
     }
 
@@ -310,8 +322,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             debugConnection.sendRequest(new DeleteBreakpointRequest(breakpointAflId));
             breakpointAflId = null;
         }
-        String localFilePath = ZendDbgUtils.getLocalPath(remoteFilePath);
-        VirtualFileEntry localFileEntry = ZendDbgUtils.getVirtualFileEntry(localFilePath);
+        String localFilePath = ZendDbgFileUtils.getLocalPath(remoteFilePath);
+        VirtualFileEntry localFileEntry = ZendDbgFileUtils.getVirtualFileEntry(localFilePath);
         if (localFileEntry == null) {
             sendCloseSession();
             LOG.error("Could not found corresponding local file for: " + remoteFilePath);
@@ -332,13 +344,13 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     private GetLocalFileContentResponse handleGetLocalFileContent(GetLocalFileContentRequest request) {
         String remoteFilePath = request.getFileName();
-        String localFilePath = ZendDbgUtils.getLocalPath(remoteFilePath);
+        String localFilePath = ZendDbgFileUtils.getLocalPath(remoteFilePath);
         if (localFilePath == null) {
             LOG.error("Could not found corresponding local file for: " + remoteFilePath);
             return new GetLocalFileContentResponse(request.getID(), GetLocalFileContentResponse.STATUS_FAILURE, null);
         }
         try {
-            VirtualFileEntry localFileEntry = ZendDbgUtils.getVirtualFileEntry(localFilePath);
+            VirtualFileEntry localFileEntry = ZendDbgFileUtils.getVirtualFileEntry(localFilePath);
             byte[] localFileContent = localFileEntry.getVirtualFile().getContentAsBytes();
             // Check if remote content is equal to corresponding local one
             if (ZendDbgConnectionUtils.isRemoteContentEqual(request.getSize(), request.getCheckSum(),
@@ -378,6 +390,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         zendVariablesExpression.evaluate();
         List<IDbgVariable> variables = new ArrayList<>();
         for (IDbgExpression zendVariableExpression : zendVariablesExpression.getChildren()) {
+            if (VariablesStorage.GLOBALS_VARIABLE.equalsIgnoreCase(zendVariableExpression.getExpression()))
+                continue;
             variables.add(new ZendDbgVariable(new VariablePathImpl(ZendDbgVariable.createName(zendVariableExpression)),
                     zendVariableExpression));
         }
@@ -387,14 +401,14 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     private void sendAddBreakpointFiles() {
         Set<String> breakpointFiles = new HashSet<>();
         for (Breakpoint breakpoint : breakpoints) {
-            String absoluteRemotePath = ZendDbgUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
+            String absoluteRemotePath = ZendDbgFileUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
             breakpointFiles.add(absoluteRemotePath);
         }
         debugConnection.sendRequest(new AddFilesRequest(breakpointFiles));
     }
 
     private void sendAddBreakpoints(String remoteFilePath) {
-        String localFilePath = ZendDbgUtils.getLocalPath(remoteFilePath);
+        String localFilePath = ZendDbgFileUtils.getLocalPath(remoteFilePath);
         List<Breakpoint> fileBreakpoints = new ArrayList<>();
         for (Breakpoint breakpoint : breakpoints) {
             if (breakpoint.getLocation().getResourcePath().equals(localFilePath)) {
@@ -413,7 +427,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     }
 
     private void sendAddBreakpoint(Breakpoint breakpoint) {
-        String remoteFilePath = ZendDbgUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
+        String remoteFilePath = ZendDbgFileUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
         AddBreakpointResponse response = debugConnection
                 .sendRequest(new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
         if (isOK(response)) {

@@ -658,16 +658,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-zend-debugger-ide</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-			<dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-zend-debugger-server</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-product-info</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -743,6 +733,16 @@
                 <version>${che.version}</version>
             </dependency>
             <!-- dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-zend-debugger-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-zend-debugger-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>maven-server-api</artifactId>
                 <version>${che.version}</version>
