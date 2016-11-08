@@ -54,7 +54,7 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null,
-      "commands": [  
+      "commands": [
         {
           "name": "restart zend server",
           "type": "custom",
