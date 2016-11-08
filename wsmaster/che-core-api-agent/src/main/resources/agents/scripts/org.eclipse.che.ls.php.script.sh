@@ -15,7 +15,7 @@ command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
-AGENT_BINARIES_URI=https://dl.dropboxusercontent.com/u/74228612/org.eclipse.che.ls.php.binaries
+AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.php.binaries
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-php
 LS_LAUNCHER=${LS_DIR}/launch.sh
