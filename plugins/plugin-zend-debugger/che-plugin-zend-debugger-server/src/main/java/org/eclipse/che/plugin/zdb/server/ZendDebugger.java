@@ -79,7 +79,6 @@ import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgConnectionUtils;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
-import org.eclipse.che.plugin.zdb.server.utils.ZendDbgVariableUtils;
 import org.eclipse.che.plugin.zdb.server.variables.IDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariables;
@@ -112,7 +111,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             IDbgVariable matchingVariable = null;
             Iterator<String> pathIterator = variablePath.getPath().iterator();
             while (pathIterator.hasNext()) {
-                String pathElement = ZendDbgVariableUtils.encodePathElement(pathIterator.next());
+                String pathElement = pathIterator.next();
                 for (IDbgVariable currentVariable : currentVariables) {
                     List<String> currentVariablePath = currentVariable.getVariablePath().getPath();
                     String currentVariablePathElement = currentVariablePath.get(currentVariablePath.size() - 1);
@@ -240,8 +239,11 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             return;
         }
         breakpoints.remove(matchingBreakpoint);
-        int breakpointId = breakpointIds.remove(matchingBreakpoint);
-        sendDeleteBreakpoint(breakpointId);
+        // Unregister breakpoint if it was registered in active session
+        if (breakpointIds.containsKey(matchingBreakpoint)) {
+            int breakpointId = breakpointIds.remove(matchingBreakpoint);
+            sendDeleteBreakpoint(breakpointId);
+        }
     }
 
     @Override
@@ -390,13 +392,11 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         ZendDbgVariables zendVariablesExpression = new ZendDbgVariables(debugExpressionEvaluator);
         zendVariablesExpression.evaluate();
         List<IDbgVariable> variables = new ArrayList<>();
+        int variableId = 0;
         for (IDbgExpression zendVariableExpression : zendVariablesExpression.getChildren()) {
             if (VariablesStorage.GLOBALS_VARIABLE.equalsIgnoreCase(zendVariableExpression.getExpression()))
                 continue;
-            variables.add(new ZendDbgVariable(
-                    new VariablePathImpl(
-                            ZendDbgVariableUtils.encodePathElement(zendVariableExpression.getExpression())),
-                    zendVariableExpression));
+            variables.add(new ZendDbgVariable(new VariablePathImpl(String.valueOf(variableId++)), zendVariableExpression));
         }
         debugVariableStorage = new VariablesStorage(variables);
     }
@@ -422,8 +422,8 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
             AddBreakpointResponse response = debugConnection.sendRequest(
                     new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
             if (isOK(response)) {
+                // Breakpoint was successfully registered in active session, send breakpoint activated event
                 breakpointIds.put(breakpoint, response.getBreakpointID());
-                // Send breakpoint activated event
                 debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
             }
         }
@@ -434,6 +434,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         AddBreakpointResponse response = debugConnection
                 .sendRequest(new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
         if (isOK(response)) {
+            // Breakpoint was successfully registered in active session, send breakpoint activated event
             breakpointIds.put(breakpoint, response.getBreakpointID());
             debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
         }
