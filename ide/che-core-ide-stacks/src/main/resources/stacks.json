@@ -143,7 +143,7 @@
             }
           },
           "recipe": {
-            "content": "services:\n db:\n  image: mysql\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: kaloyanraev/che-zendserver\n  mem_limit: 2147483648\n  depends_on:\n    - db",
+            "content": "services:\n db:\n  image: kaloyanraev/mysql-no-volume\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: kaloyanraev/che-zendserver\n  mem_limit: 2147483648\n  depends_on:\n    - db",
             "contentType": "application/x-yaml",
             "type": "compose"
           }
