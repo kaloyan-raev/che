@@ -57,7 +57,7 @@
       {
         "name": "configure",
         "type": "custom",
-        "commandLine": "chmod -R 777 ${current.project.path}/data; echo \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; cd ${current.project.path} && composer install; export DEBIAN_FRONTEND=noninteractive && sudo -E apt-get -q -y install mysql-server && sudo service mysql start && php bin/setup_db.php --rootuser root --rootpassword \"\" --user phonebook --password phonebook --host localhost --database phonebook",
+        "commandLine": "chmod -R 777 ${current.project.path}/data; echo \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; cd ${current.project.path} && composer install; php bin/setup_db.php --rootuser root --rootpassword password --user phonebook --password phonebook --host db --database phonebook",
         "attributes": {
           "previewUrl": ""
         }
@@ -66,7 +66,7 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "Zend"
+      "MySQL"
     ]
   },
   {
