@@ -139,7 +139,6 @@
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="false">
 
-        <!-- Serve zipped sample projects -->
         <Context docBase="../../templates/zip" path="/samples" />
 
         <!-- Provide Che Agent binaries (like workspace agent, terminal) -->
