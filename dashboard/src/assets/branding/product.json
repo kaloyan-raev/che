@@ -1,13 +1,13 @@
 {
-  "title": "Eclipse Che ",
-  "name": "Eclipse Che",
-  "logoFile": "che-logo.svg",
-  "logoTextFile": "che-logo-text.svg",
+  "title": "Zend Training ",
+  "name": "Zend Training",
+  "logoFile": "zend-training-logo.svg",
+  "logoTextFile": "zend-training-logo-text.svg",
   "favicon": "favicon.ico",
   "loader": "loader.svg",
   "ideResources": "/_app/",
-  "helpPath": "https://www.eclipse.org/che/",
-  "helpTitle": "Community",
-  "supportEmail": "wish@codenvy.com",
+  "helpPath": "http://www.zend.com/en/services/training",
+  "helpTitle": "Zend Training",
+  "supportEmail": "itraining@zend.com",
   "oauthDocs": "Configure OAuth in the che.properties file."
 }

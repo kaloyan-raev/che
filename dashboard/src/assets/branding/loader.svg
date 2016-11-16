@@ -1,30 +1,90 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-
-    Copyright (c) 2015-2016 Codenvy, S.A.
+    Copyright (c) 2016 Rogue Wave Software, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
-
     Contributors:
-      Codenvy, S.A. - initial API and implementation
-
+      Rogue Wave Software, Inc. - initial API and implementation
 -->
-<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="70px"
-     width="70px" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"
-     viewBox="0 0 47 57">
-  <metadata>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   height="66.489998"
+   width="54"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="Zend_Technologies_Logo.svg">
+  <title
+     id="title3009">Zend logo</title>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1600"
+     inkscape:window-height="844"
+     id="namedview26"
+     showgrid="false"
+     inkscape:zoom="1"
+     inkscape:cx="45.319996"
+     inkscape:cy="33.743149"
+     inkscape:window-x="-4"
+     inkscape:window-y="-4"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata6">
     <rdf:RDF>
-      <cc:Work rdf:about="">
+      <cc:Work
+         rdf:about="">
         <dc:format>image/svg+xml</dc:format>
-        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-        <dc:title/>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Zend logo</dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
-  <g fill-rule="evenodd" stroke="none" stroke-width="1" fill="none">
-    <path d="M0.032227,30.88l-0.032227-17.087,23.853-13.793,23.796,13.784-14.691,8.51-9.062-5.109-23.864,13.695z" fill="#fdb940"/>
-    <path d="M0,43.355l23.876,13.622,23.974-13.937v-16.902l-23.974,13.506-23.876-13.506v17.217z" fill="#525c86"/>
+  <g
+     transform="translate(-348.15625,-305.32964)"
+     id="g8">
+    <path
+       d="m 401.25,305.625 -32,42.1875 24.7812,0 c 3.9925,0 7.21875,-3.265 7.21875,-7.25 V 305.625 z m -44.875,6.96875 c -3.98875,0 -7.21875,3.26125 -7.21875,7.25 v 34.9688 l 32,-42.2188 h -24.7812 z"
+       id="path10"
+       inkscape:connector-curvature="0"
+       style="fill:#01719f;fill-rule:nonzero" />
+    <path
+       d="m 361.264,370.413 -1.395,-1.77875 -6.50375,0 c 0.1225,-0.165 7.88875,-10.39 7.88875,-10.39 h -11.4525 l 1.37625,1.7575 h 6.52625 c -0.1225,0.16 -7.92375,10.4075 -7.92375,10.4075 l 11.4838,0.004 z"
+       id="path14"
+       inkscape:connector-curvature="0"
+       style="fill:#01719f;fill-rule:nonzero" />
+    <path
+       d="m 381.415,358.244 -5.30375,0 0,12.13 1.8125,0 0,-10.32 3.235,0 c 3.18125,0 5.08125,1.45125 5.08125,3.88625 v 6.43375 h 1.80875 v -6.52625 c 0,-2.78875 -2.05125,-5.60375 -6.63375,-5.60375"
+       id="path16"
+       inkscape:connector-curvature="0"
+       style="fill:#01719f;fill-rule:nonzero" />
+    <path
+       d="m 399.7,354.782 c 0,0 -10e-4,3.3625 -10e-4,3.46125 h -4.18625 c -3.05625,0 -5.455,2.00875 -5.96625,5.00125 -0.0475,0.38875 -0.0738,0.76125 -0.0738,1.06 0,0.435 0.0513,0.86625 0.0738,1.03125 0.50125,2.94625 3.01,5.07375 5.96625,5.07375 l 5.78125,0.004 v -16.8388 l -1.59375,1.2075 z m -0.21875,5.27125 0,8.5525 -4.0025,0 c -1.88125,0 -3.655,-1.45375 -4.1225,-3.37875 0,-0.002 -0.0713,-0.9225 -0.0713,-0.9225 0,-0.25125 0.025,-0.5825 0.0713,-0.92875 0.43125,-1.9875 2.1425,-3.31 4.2675,-3.31 0,0 3.755,-0.0125 3.8575,-0.0125"
+       id="path18"
+       inkscape:connector-curvature="0"
+       style="fill:#01719f;fill-rule:nonzero" />
+    <path
+       d="m 374.266,364.98 0.0312,-0.665 c 0,-3.59125 -2.91875,-6.51125 -6.5075,-6.51125 -3.58875,0 -6.50625,2.92 -6.50625,6.50875 0,3.5875 2.9175,6.5075 6.50625,6.5075 2.7325,0 5.19,-1.72875 6.11875,-4.30625 h -1.935 c -0.82125,1.565 -2.415,2.535 -4.18375,2.535 -2.35375,0 -4.34875,-1.75 -4.6775,-4.07625 h 9.48375 l 1.67,0.007 z m -11.055,-1.82 c 0.5225,-2.07875 2.43625,-3.5825 4.57875,-3.5825 2.145,0 4.0575,1.50375 4.5825,3.5825 H 363.211 z"
+       id="path20"
+       inkscape:connector-curvature="0"
+       style="fill:#01719f;fill-rule:nonzero" />
   </g>
 </svg>
